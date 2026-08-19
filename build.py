@@ -349,7 +349,6 @@ def build_index():
         <div class="hero__actions">
           <a class="btn btn--primary" href="#work">See the work</a>
           <a class="btn btn--ghost" href="{e(SITE['links']['cv'])}" download>{ICONS['download']}Download CV</a>
-          <a class="btn btn--ghost" href="{e(SITE['links']['github'])}" rel="noopener" target="_blank">{ICONS['github']}GitHub</a>
         </div>
       </div>
       <img class="hero__photo" src="assets/img/profile.jpg"

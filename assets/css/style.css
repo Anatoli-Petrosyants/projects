@@ -74,6 +74,7 @@ body {
 }
 
 img, svg { display: block; max-width: 100%; }
+img { height: auto; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
@@ -138,6 +139,10 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
   .nav__links a { padding: 7px 8px; font-size: .87rem; }
   .nav__links a.is-optional { display: none; }
 }
+@media (max-width: 560px) {
+  /* the full name wraps to two lines and doubles the header height */
+  .nav__brand span { display: none; }
+}
 
 /* ---------- buttons ---------- */
 .btn {
@@ -175,8 +180,9 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 .hero__role { color: var(--accent); font-weight: 600; margin-bottom: 8px; letter-spacing: -.01em; }
 .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 @media (max-width: 720px) {
-  .hero__grid { grid-template-columns: 1fr; }
-  .hero__photo { width: 120px; height: 120px; justify-self: start; }
+  .hero__grid { grid-template-columns: 1fr; gap: 22px; }
+  /* photo is the second grid item in source order, but reads better above the copy */
+  .hero__photo { width: 96px; height: 96px; justify-self: start; order: -1; }
 }
 
 /* ---------- stats ---------- */
