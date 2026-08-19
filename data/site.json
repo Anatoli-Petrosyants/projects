@@ -1,0 +1,145 @@
+{
+  "name": "Anatoli Petrosyants",
+  "role": "iOS Developer",
+  "tagline": "Product-oriented iOS developer building high-performance, well-architected Apple apps since 2012.",
+  "email": "tolik.petrosyants@gmail.com",
+  "phone": "+37455399767",
+  "phoneDisplay": "+374 55 399767",
+  "baseUrl": "https://anatoli-petrosyants.github.io/projects",
+  "links": {
+    "linkedin": "https://www.linkedin.com/in/anatoli-petrosyants/",
+    "upwork": "https://www.upwork.com/freelancers/iosappdeveloper/",
+    "github": "https://github.com/Anatoli-Petrosyants",
+    "cv": "assets/files/resume_anatoli_petrosyants.pdf",
+    "whatsapp": "https://wa.me/37455399767",
+    "telegram": "https://t.me/+37455399767"
+  },
+  "stats": [
+    {
+      "value": "14+",
+      "label": "Years building iOS"
+    },
+    {
+      "value": "30+",
+      "label": "Production apps"
+    },
+    {
+      "value": "2M+",
+      "label": "Users reached"
+    },
+    {
+      "value": "2012",
+      "label": "Shipping since"
+    }
+  ],
+  "skills": {
+    "Architecture": [
+      "TCA",
+      "MVVM",
+      "Clean Architecture",
+      "Modular / SPM"
+    ],
+    "Apple platforms": [
+      "Swift",
+      "SwiftUI",
+      "UIKit",
+      "Combine",
+      "Swift Concurrency",
+      "HealthKit",
+      "WatchConnectivity",
+      "WidgetKit"
+    ],
+    "Quality": [
+      "Unit testing",
+      "UI testing",
+      "CI/CD"
+    ],
+    "AI-assisted": [
+      "Claude Code",
+      "Codex"
+    ]
+  },
+  "experience": [
+    {
+      "company": "iFIT Workouts",
+      "title": "iOS Developer",
+      "period": "Jun 2025 — Jun 2026",
+      "points": [
+        "Contributed to the iFIT fitness platform's Apple Watch app using WatchConnectivity.",
+        "Built heart rate collection and live workout session flows with HealthKit.",
+        "Supported 10,000+ on-demand workouts across cardio, strength, cycling, yoga and HIIT.",
+        "Platform filmed across all seven continents, used by millions worldwide."
+      ],
+      "project": "ifit"
+    },
+    {
+      "company": "Iris Dating",
+      "title": "iOS Developer / Team Lead",
+      "period": "May 2022 — May 2025",
+      "points": [
+        "Led the iOS team for the AI-powered dating app iris.",
+        "Migrated a UIKit + RxSwift + MVVM codebase to SwiftUI + TCA.",
+        "Developed an AI training model to improve user engagement.",
+        "Implemented real-time chat with Twilio.",
+        "Integrated A/B testing and analytics.",
+        "Featured by TechCrunch and Forbes; 2M+ downloads."
+      ],
+      "project": "iris"
+    },
+    {
+      "company": "Oracle",
+      "title": "Senior Principal Application Engineer",
+      "period": "Nov 2018 — May 2022",
+      "points": [
+        "Developed and maintained a screen-sharing SDK.",
+        "Worked with sockets, multithreading and low-level optimizations.",
+        "Integrated the SDK with clients including Bank of America, Motorola and Toyota.",
+        "Improved performance and scalability."
+      ]
+    },
+    {
+      "company": "Rentecarlo",
+      "title": "iOS Developer",
+      "period": "Dec 2015 — Dec 2017",
+      "points": [
+        "Developed the Rentecarlo iOS application.",
+        "Integrated Stripe payments.",
+        "Built custom UI components.",
+        "Added iPad layout support and improved performance."
+      ]
+    },
+    {
+      "company": "Livelook",
+      "title": "iOS Developer",
+      "period": "Apr 2014 — Dec 2015",
+      "points": [
+        "Optimized image difference detection.",
+        "Added annotations, remote pointers and more.",
+        "Company later acquired by Oracle."
+      ]
+    },
+    {
+      "company": "Sourcio CJSC",
+      "title": "iOS & JavaScript Developer",
+      "period": "Apr 2012 — Apr 2014",
+      "points": [
+        "Built mobile ad templates for Google DFP.",
+        "Joined a healthcare startup team.",
+        "Delivered 8 mobile apps focused on eye care."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "Armenian National Academy of Sciences",
+      "degree": "Master's Degree — Computer Science",
+      "period": "2013 — 2015"
+    },
+    {
+      "school": "State Engineering University of Armenia",
+      "degree": "Bachelor's Degree — Microelectronics & Biomedical Devices",
+      "period": "2005 — 2009"
+    }
+  ],
+  "hobbies": "Hiking, FPV drones and triathlon: running, cycling and swimming. Completed a Full Ironman and climbed Mount Ararat (5,135 m)."
+}

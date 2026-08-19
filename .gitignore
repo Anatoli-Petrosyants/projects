@@ -1,0 +1,33 @@
+# NOTE: the generated HTML (index.html, contact.html, 404.html, projects/*.html,
+# sitemap.xml, robots.txt) is deliberately TRACKED. GitHub Pages serves files as
+# they are and never runs build.py, so ignoring them would publish an empty site.
+
+# macOS
+.DS_Store
+**/.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Tooling that may appear later
+node_modules/
+*.log
+
+# Local agent settings
+.claude/settings.local.json

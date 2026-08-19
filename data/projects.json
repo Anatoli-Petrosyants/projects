@@ -1,0 +1,251 @@
+[
+  {
+    "slug": "ifit",
+    "name": "iFIT Workouts",
+    "tagline": "Immersive cardio and strength workouts, filmed across all seven continents.",
+    "seller": "ICON Health & Fitness, Inc.",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "Jun 2025 — Jun 2026",
+    "genre": "Health & Fitness",
+    "rating": "4.7",
+    "ratingCount": "71,447",
+    "released": "2017",
+    "appStoreUrl": "https://apps.apple.com/us/app/ifit-for-equipment/id1274601042",
+    "about": [
+      "iFIT is a global fitness platform with over 10,000 on-demand workouts filmed in outdoor locations across all seven continents: high-intensity cardio, full-body strength, cycling, yoga, Pilates, HIIT, barre, marathon training plans, stretching, walking and mindfulness.",
+      "The app pairs with iFIT-enabled treadmills, bikes, ellipticals and rowers, automatically adjusting incline, resistance and speed to follow the terrain a trainer is running. Millions of people use it to train at home."
+    ],
+    "contributions": [
+      "Contributed to the Apple Watch app, syncing state with the phone over WatchConnectivity.",
+      "Built heart rate collection and live workout session flows on HealthKit.",
+      "Worked inside a codebase serving 10,000+ workouts to millions of users."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "HealthKit",
+      "WatchConnectivity",
+      "watchOS",
+      "Swift Concurrency"
+    ]
+  },
+  {
+    "slug": "iris",
+    "name": "iris Dating",
+    "tagline": "AI-powered matchmaking that learns the faces and values you are drawn to.",
+    "seller": "Ideal Match Inc",
+    "ownership": "client",
+    "role": "iOS Developer / Team Lead",
+    "period": "May 2022 — May 2025",
+    "genre": "Lifestyle · Social Networking",
+    "rating": "4.5",
+    "ratingCount": "5,742",
+    "released": "2019",
+    "appStoreUrl": "https://apps.apple.com/us/app/iris-dating-let-ai-find-match/id1446249319",
+    "about": [
+      "iris uses artificial intelligence to connect people who share interests, values and even preferred facial features. The model trains on each user's own reactions, so recommendations sharpen the longer someone uses the app.",
+      "The product has been featured by TechCrunch and Forbes and passed 2M+ downloads."
+    ],
+    "contributions": [
+      "Led the iOS team through three years of product development.",
+      "Migrated the app from UIKit + RxSwift + MVVM to SwiftUI + The Composable Architecture.",
+      "Developed an AI training model that improved user engagement.",
+      "Implemented real-time chat on Twilio.",
+      "Integrated A/B testing and product analytics across the funnel."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "TCA",
+      "UIKit",
+      "RxSwift",
+      "Combine",
+      "Twilio",
+      "A/B testing"
+    ]
+  },
+  {
+    "slug": "fivepointfive",
+    "name": "FivePointFive: Breathwork",
+    "tagline": "The first breathwork app built for athletes, with coached sessions and live heart rate.",
+    "seller": "FivePointFive Movement Limited",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "",
+    "genre": "Health & Fitness",
+    "rating": "4.8",
+    "ratingCount": "3,845",
+    "released": "2024",
+    "appStoreUrl": "https://apps.apple.com/us/app/fivepointfive-breathwork/id6469338436",
+    "about": [
+      "FivePointFive turns breathing science into short, coached sessions that target performance, recovery, focus and sleep. It is used by elite athletes and a fast-growing community of everyday athletes.",
+      "Peer-reviewed research links structured breathwork to higher VO₂-max, improved HRV and lower resting heart rate. The app makes that measurable: live heart rate during a class lets you watch your autonomic nervous system shift in real time."
+    ],
+    "contributions": [
+      "iOS development on a live, session-based health product.",
+      "Live heart rate streaming during guided classes.",
+      "Session playback and progress tracking flows."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "HealthKit",
+      "Combine",
+      "AVFoundation"
+    ]
+  },
+  {
+    "slug": "easy-metronome",
+    "name": "Easy Metronome",
+    "tagline": "A precise, customizable metronome for practice and live performance.",
+    "seller": "Digipom Inc.",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "",
+    "genre": "Music · Utilities",
+    "rating": "4.7",
+    "ratingCount": "379",
+    "released": "2023",
+    "appStoreUrl": "https://apps.apple.com/us/app/easy-metronome/id6459476235",
+    "about": [
+      "Easy Metronome keeps a steady tempo for musicians at any level. A large visual beat display makes lessons easier to follow, with up to 16 beats per bar and adjustable emphasis or silence on each.",
+      "Experienced players get quick time-signature selection, subdivisions for different playing patterns, and tap-tempo entry with decimal precision up to 999 BPM."
+    ],
+    "contributions": [
+      "iOS development on a low-latency audio utility.",
+      "Precise timing engine driving the visual beat display.",
+      "Configurable time signatures, subdivisions and beat sounds."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "AVFoundation",
+      "Core Audio"
+    ]
+  },
+  {
+    "slug": "luep",
+    "name": "Luep",
+    "tagline": "Channel-driven platform for organizations to manage and grow engaged members.",
+    "seller": "Astonishing Technology LLC",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "",
+    "genre": "Social Networking · Productivity",
+    "rating": "4.9",
+    "ratingCount": "19",
+    "released": "2022",
+    "appStoreUrl": "https://apps.apple.com/us/app/luep/id1618214074",
+    "about": [
+      "Luep (pronounced \"loop\") gives organizations of any size the tools to manage and develop highly engaged members, built for corporations, universities, non-profits, churches and community groups.",
+      "Content is organized into channels, so members subscribe to what matters to them instead of one undifferentiated feed."
+    ],
+    "contributions": [
+      "iOS development on a multi-tenant, channel-based social product.",
+      "Feed, channel subscription and member management flows.",
+      "Push notification handling for channel activity."
+    ],
+    "tech": [
+      "Swift",
+      "UIKit",
+      "MVVM",
+      "REST API",
+      "Push Notifications"
+    ]
+  },
+  {
+    "slug": "parcel-tracker",
+    "name": "Parcel Tracker - Mailroom",
+    "tagline": "Log a parcel by pointing the camera at it. Computer vision does the rest.",
+    "seller": "deepfinity ltd",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "",
+    "genre": "Productivity · Shopping",
+    "rating": "4.6",
+    "ratingCount": "35",
+    "released": "2020",
+    "appStoreUrl": "https://apps.apple.com/us/app/parcel-tracker-mailroom/id1491350064",
+    "about": [
+      "Parcel Tracker uses computer vision and OCR to make mailroom handling fast. Logging a parcel is as simple as pointing the device at the label: the tenant name and barcode are detected instantly and the tenant is notified automatically.",
+      "Collection is handled with scannable QR notifications and a captured signature as proof. Data syncs to the server for backup and stays on device for offline use."
+    ],
+    "contributions": [
+      "iOS development on a camera-first logistics tool.",
+      "Label scanning with OCR and barcode detection.",
+      "Offline-first data layer with server sync."
+    ],
+    "tech": [
+      "Swift",
+      "Vision",
+      "AVFoundation",
+      "Core Data",
+      "Offline sync"
+    ]
+  },
+  {
+    "slug": "palettes-lab",
+    "name": "Palettes Lab",
+    "tagline": "Turn any photo into a designer-ready color palette in seconds.",
+    "seller": "Anatoli Petrosyants",
+    "ownership": "own",
+    "role": "Solo design and development",
+    "period": "2025 — present",
+    "genre": "Graphics & Design · Utilities",
+    "rating": "5.0",
+    "ratingCount": "5",
+    "released": "2025",
+    "appStoreUrl": "https://apps.apple.com/us/app/palettes-lab/id6739775678",
+    "about": [
+      "Palettes Lab is a color tool for designers, artists and photographers, anyone whose work depends on getting color exactly right. Build a brand, refine a mood board or match a paint, and every palette is one tap away.",
+      "Colors are picked from any photo or the live camera, with HEX, RGB, CMYK and harmony breakdowns for every shade. Palettes group into folders by brand, room, client or shoot, and on-device AI suggests tags as you scan, and nothing leaves the phone."
+    ],
+    "contributions": [
+      "My own app: concept, design, development and App Store release.",
+      "Live camera and photo color extraction with precise picking.",
+      "On-device AI tagging, so nothing leaves the phone.",
+      "Folder organization, reordering, renaming and tag filtering."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "TCA",
+      "Core Image",
+      "Vision",
+      "Core ML",
+      "SwiftData"
+    ]
+  },
+  {
+    "slug": "ctrltv",
+    "name": "CtrlTV: Smart TV Remote",
+    "tagline": "Lost your TV remote? Control Samsung, LG, Sony and Hisense from your iPhone.",
+    "seller": "Anatoli Petrosyants",
+    "ownership": "own",
+    "role": "Solo design and development",
+    "period": "2026 — present",
+    "genre": "Utilities · Entertainment",
+    "rating": "5.0",
+    "ratingCount": "1",
+    "released": "2026",
+    "appStoreUrl": "https://apps.apple.com/am/app/ctrltv/id6760845815",
+    "about": [
+      "CtrlTV connects to a smart TV over Wi-Fi and gives full control from the phone: power, volume, channels and navigation, with no extra hardware and no pairing dance.",
+      "A built-in keyboard makes typing passwords and searches fast, and touchpad or keypad control modes cover both browsing and precise input. Auto-reconnect, a sleep timer and quick app launches round it out."
+    ],
+    "contributions": [
+      "My own app: concept, design, development and App Store release.",
+      "Local network discovery and protocol handling for four TV vendors.",
+      "Touchpad and keypad control modes with a built-in keyboard.",
+      "Auto-reconnect and sleep timer."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "Network.framework",
+      "Bonjour",
+      "WebSocket"
+    ]
+  }
+]
