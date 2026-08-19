@@ -161,6 +161,7 @@ def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg
 
 
 def header(prefix, current):
+    first_name, _, last_name = SITE["name"].partition(" ")
     links = []
     for href, label, optional in NAV:
         target = link(prefix, href)
@@ -173,7 +174,7 @@ def header(prefix, current):
     <nav class="nav" aria-label="Main">
       <a class="nav__brand" href="{link(prefix, "index.html")}">
         <img src="{prefix}assets/img/profile-sm.jpg" alt="" width="28" height="28">
-        <span>{e(SITE['name'])}</span>
+        <span class="nav__name">{e(first_name)}<span class="nav__surname"> {e(last_name)}</span></span>
       </a>
       <div class="nav__links">
         {''.join(links)}
