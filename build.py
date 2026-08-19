@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Static site generator for the portfolio.
 
-Reads data/site.json + data/projects.json, writes index.html, contact.html,
+Reads data/site.json + data/projects.json, writes index.html (contact lives in
+its #contact section), contact.html (a redirect stub for the old URL),
 projects/<slug>.html, 404.html, sitemap.xml and robots.txt.
 
 No third-party dependencies. Run:  python3 build.py
@@ -85,7 +86,7 @@ NAV = [
     ("index.html", "Home", False),
     ("index.html#work", "Work", False),
     ("index.html#experience", "Experience", True),
-    ("contact.html", "Contact", False),
+    ("index.html#contact", "Contact", False),
 ]
 
 
@@ -195,7 +196,7 @@ def footer(prefix, fab=True):
     fab_html = ""
     if fab:
         fab_html = (
-            f'<a class="fab" href="{prefix}contact.html" aria-label="Get in touch">'
+            f'<a class="fab" href="{link(prefix, "index.html#contact")}" aria-label="Get in touch">'
             f"{ICONS['mail']}<span>Get in touch</span></a>\n"
         )
     return fab_html + f"""<footer class="site-footer">
@@ -298,6 +299,31 @@ def app_card(project, prefix):
 # --------------------------------------------------------------------------
 # pages
 # --------------------------------------------------------------------------
+
+def contact_links(prefix=""):
+    """The 'Elsewhere' list of direct contact channels."""
+    links = SITE["links"]
+    rows = [
+        (ICONS["mail"], "Email", SITE["email"], f"mailto:{SITE['email']}", False),
+        (ICONS["phone"], "Phone", SITE["phoneDisplay"], f"tel:{SITE['phone']}", False),
+        (ICONS["whatsapp"], "WhatsApp", SITE["phoneDisplay"], links["whatsapp"], True),
+        (ICONS["telegram"], "Telegram", SITE["phoneDisplay"], links["telegram"], True),
+        (ICONS["linkedin"], "LinkedIn", "in/anatoli-petrosyants", links["linkedin"], True),
+        (ICONS["upwork"], "Upwork", "Hire me for contract work", links["upwork"], True),
+        (ICONS["github"], "GitHub", "Anatoli-Petrosyants", links["github"], True),
+        (ICONS["download"], "Curriculum vitae", "PDF, one page",
+         prefix + links["cv"], False),
+    ]
+    out = []
+    for icon, label, value, href, external in rows:
+        target = ' rel="noopener" target="_blank"' if external else ""
+        out.append(
+            '<a class="contact-link" href="%s"%s>%s'
+            '<span><strong>%s</strong><small>%s</small></span></a>'
+            % (e(href), target, icon, e(label), e(value))
+        )
+    return "".join(out)
+
 
 def build_index():
     stats = "".join(
@@ -412,15 +438,37 @@ def build_index():
     <div class="wrap">
       <p class="eyebrow">Open to work</p>
       <h2>Let's build something great.</h2>
-      <p class="lead" style="margin-bottom:28px">
+      <p class="lead" style="margin-bottom:44px">
         Available for iOS contract and full-time roles. The fastest way to reach me is email.
       </p>
-      <div class="hero__actions" style="margin-top:0">
-        <a class="btn btn--primary" href="contact.html">{ICONS['mail']}Contact me</a>
-        <a class="btn btn--ghost" href="{e(SITE['links']['whatsapp'])}" rel="noopener" target="_blank">{ICONS['whatsapp']}WhatsApp</a>
-        <a class="btn btn--ghost" href="{e(SITE['links']['telegram'])}" rel="noopener" target="_blank">{ICONS['telegram']}Telegram</a>
-        <a class="btn btn--ghost" href="{e(SITE['links']['linkedin'])}" rel="noopener" target="_blank">{ICONS['linkedin']}LinkedIn</a>
-        <a class="btn btn--ghost" href="{e(SITE['links']['upwork'])}" rel="noopener" target="_blank">{ICONS['upwork']}Upwork</a>
+
+      <div class="contact-grid">
+        <form data-mailto-form="{e(SITE['email'])}" novalidate>
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" name="name" type="text" autocomplete="name" required>
+            <span class="error" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="email">Your email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+            <span class="error" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="7" required></textarea>
+            <span class="error" aria-live="polite"></span>
+          </div>
+          <button class="btn btn--primary" type="submit">{ICONS['mail']}Open email draft</button>
+          <p class="form-note" data-form-status aria-live="polite">
+            No mail app? Write to <a href="mailto:{e(SITE['email'])}">{e(SITE['email'])}</a> directly.
+          </p>
+        </form>
+
+        <div>
+          <p class="eyebrow">Elsewhere</p>
+          <div class="contact-links">{contact_links()}</div>
+        </div>
       </div>
     </div>
   </section>
@@ -585,78 +633,25 @@ def build_project(index, project):
     (PROJECT_DIR / f"{slug}.html").write_text(page, encoding="utf-8")
 
 
-def build_contact():
-    links = SITE["links"]
-    contact_rows = [
-        (ICONS["mail"], "Email", SITE["email"], f"mailto:{SITE['email']}", False),
-        (ICONS["phone"], "Phone", SITE["phoneDisplay"], f"tel:{SITE['phone']}", False),
-        (ICONS["whatsapp"], "WhatsApp", SITE["phoneDisplay"], links["whatsapp"], True),
-        (ICONS["telegram"], "Telegram", SITE["phoneDisplay"], links["telegram"], True),
-        (ICONS["linkedin"], "LinkedIn", "in/anatoli-petrosyants", links["linkedin"], True),
-        (ICONS["upwork"], "Upwork", "Hire me for contract work", links["upwork"], True),
-        (ICONS["github"], "GitHub", "Anatoli-Petrosyants", links["github"], True),
-        (ICONS["download"], "Curriculum vitae", "PDF, one page", links["cv"], False),
-    ]
-    rows = "".join(
-        f'<a class="contact-link" href="{e(href)}"'
-        + (' rel="noopener" target="_blank"' if external else "")
-        + f'>{icon}<span><strong>{e(label)}</strong><small>{e(value)}</small></span></a>'
-        for icon, label, value, href, external in contact_rows
-    )
-
-    body = f"""{header('', 'contact.html')}
-<main id="main">
-  <section class="section">
-    <div class="wrap">
-      <p class="eyebrow">Contact</p>
-      <h2>Tell me about the project.</h2>
-      <p class="lead" style="margin-bottom:44px">
-        Open to iOS contract work and full-time roles. Fill this in and it opens a
-        pre-written email in your mail app. Nothing is sent to a third-party server.
-        Prefer to message? WhatsApp and Telegram are on the right.
-      </p>
-
-      <div class="contact-grid">
-        <form data-mailto-form="{e(SITE['email'])}" novalidate>
-          <div class="field">
-            <label for="name">Your name</label>
-            <input id="name" name="name" type="text" autocomplete="name" required>
-            <span class="error" aria-live="polite"></span>
-          </div>
-          <div class="field">
-            <label for="email">Your email</label>
-            <input id="email" name="email" type="email" autocomplete="email" required>
-            <span class="error" aria-live="polite"></span>
-          </div>
-          <div class="field">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" rows="7" required></textarea>
-            <span class="error" aria-live="polite"></span>
-          </div>
-          <button class="btn btn--primary" type="submit">{ICONS['mail']}Open email draft</button>
-          <p class="form-note" data-form-status aria-live="polite">
-            No mail app? Write to <a href="mailto:{e(SITE['email'])}">{e(SITE['email'])}</a> directly.
-          </p>
-        </form>
-
-        <div>
-          <p class="eyebrow">Elsewhere</p>
-          <div class="contact-links">{rows}</div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-{footer('', fab=False)}"""
-
-    page = head(
-        f"Contact · {SITE['name']}",
-        f"Get in touch with {SITE['name']}, {SITE['role'].lower()} open to contract and "
-        f"full-time work. Email, phone, WhatsApp, Telegram, LinkedIn and Upwork.",
-        "",
-        "contact.html",
-        og_type="profile",
-    ) + body
+def build_contact_redirect():
+    """Keep the old /contact.html URL alive; the form now lives at /#contact."""
+    target = BASE_URL + "/#contact"
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact · {e(SITE['name'])}</title>
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="{e(BASE_URL)}/">
+<meta http-equiv="refresh" content="0; url={e(target)}">
+<script>location.replace({json.dumps(target)});</script>
+</head>
+<body>
+<p>The contact section moved. <a href="{e(target)}">Continue to {e(target)}</a>.</p>
+</body>
+</html>
+"""
     (ROOT / "contact.html").write_text(page, encoding="utf-8")
 
 
@@ -681,7 +676,7 @@ def build_404():
 
 
 def build_sitemap():
-    urls = [("", "1.0", "monthly"), ("contact.html", "0.7", "yearly")]
+    urls = [("", "1.0", "monthly")]
     urls += [(f"projects/{p['slug']}.html", "0.8", "monthly") for p in PROJECTS]
 
     entries = "".join(
@@ -717,13 +712,13 @@ def build_cname():
 
 def main():
     build_index()
-    build_contact()
+    build_contact_redirect()
     for index, project in enumerate(PROJECTS):
         build_project(index, project)
     build_404()
     build_sitemap()
     build_cname()
-    print(f"built: index.html, contact.html, 404.html, {len(PROJECTS)} project pages, "
+    print(f"built: index.html, contact.html (redirect), 404.html, {len(PROJECTS)} project pages, "
           "sitemap.xml, robots.txt, CNAME")
 
 

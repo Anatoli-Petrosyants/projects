@@ -38,7 +38,7 @@ Three layers:
    Rename a slug and all three must move.
 3. **`build.py`** — templates as Python functions. `head()`, `header()`,
    `footer()` build shared chrome; `build_index()`, `build_project()`,
-   `build_contact()`, `build_404()` build pages; `build_sitemap()` writes
+   `build_contact_redirect()`, `build_404()` build pages; `build_sitemap()` writes
    `sitemap.xml` and `robots.txt`.
 
 ### Path prefixes
@@ -75,7 +75,7 @@ These are easy to break silently, so check them after touching `head()` or the
 page builders:
 
 - Every page has a unique `<title>` and `<meta name="description">`.
-- `404.html` is the only page built with `noindex=True`.
+- `404.html` and the `contact.html` redirect stub are the only noindexed pages.
 - Every `<img>` carries `width` and `height`. Project screenshots get theirs from
   `image_size()`, which parses PNG and JPEG headers directly — without them the
   page reflows as images load and Cumulative Layout Shift suffers.

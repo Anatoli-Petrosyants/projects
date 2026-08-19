@@ -18,7 +18,7 @@ assets/img/icons/       512px App Store icons, used on cards
 assets/img/apps/        Screenshot collages (JPEG), used on project pages
 assets/files/           CV (PDF)
 index.html              Generated
-contact.html            Generated
+contact.html            Generated redirect stub for the old contact URL
 404.html                Generated
 projects/*.html         Generated, one per app
 sitemap.xml robots.txt  Generated
@@ -96,7 +96,7 @@ Google Search Console.
 
 ## Contact form
 
-The form on `contact.html` does not post anywhere. It validates the input and
+The form lives in the `#contact` section of the home page and does not post anywhere. It validates the input and
 opens a pre-filled `mailto:` draft in the visitor's mail client. That keeps the
 site fully static with no third-party form service. To switch to a hosted
 endpoint later (Formspree, Web3Forms), give the `<form>` a real `action` and drop
