@@ -303,6 +303,7 @@ def build_index():
         <a class="btn btn--ghost" href="{e(SITE['links']['telegram'])}" rel="noopener" target="_blank">{ICONS['telegram']}Telegram</a>
         <a class="btn btn--ghost" href="{e(SITE['links']['linkedin'])}" rel="noopener" target="_blank">{ICONS['linkedin']}LinkedIn</a>
         <a class="btn btn--ghost" href="{e(SITE['links']['upwork'])}" rel="noopener" target="_blank">{ICONS['upwork']}Upwork</a>
+        <a class="btn btn--ghost" href="{e(SITE['links']['github'])}" rel="noopener" target="_blank">{ICONS['github']}GitHub</a>
       </div>
     </div>
   </section>
