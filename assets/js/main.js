@@ -38,6 +38,57 @@
     }
   }
 
+  /* ---- screenshot galleries ---- */
+  document.querySelectorAll("[data-gallery]").forEach(function (gallery) {
+    var viewport = gallery.querySelector(".gallery__viewport");
+    var buttons = gallery.querySelectorAll("[data-gallery-step]");
+    if (!viewport || !buttons.length) return;
+
+    function go(direction) {
+      /* each arrow runs the strip all the way to its end */
+      var target = direction > 0 ? viewport.scrollWidth - viewport.clientWidth : 0;
+      if (typeof viewport.scrollTo === "function") {
+        viewport.scrollTo({ left: target, behavior: "smooth" });
+      } else {
+        viewport.scrollLeft = target;
+      }
+      /* Safari fires no scroll event when the position is already at an end */
+      setTimeout(sync, 400);
+    }
+
+    function sync() {
+      var max = viewport.scrollWidth - viewport.clientWidth;
+      var left = viewport.scrollLeft;
+      buttons.forEach(function (button) {
+        /* nothing to scroll at all: no arrows */
+        button.hidden = max <= 2;
+        /* parked at that end: keep the arrow in place but dim and inert */
+        var forward = button.getAttribute("data-gallery-step") === "1";
+        button.disabled = forward ? left >= max - 2 : left <= 2;
+      });
+    }
+
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        go(Number(button.getAttribute("data-gallery-step")));
+      });
+    });
+
+    var pending = false;
+    viewport.addEventListener("scroll", function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () { pending = false; sync(); });
+    }, { passive: true });
+
+    window.addEventListener("resize", sync);
+    /* images are lazy, so scrollWidth only settles once they have loaded */
+    viewport.querySelectorAll("img").forEach(function (image) {
+      if (!image.complete) image.addEventListener("load", sync, { once: true });
+    });
+    sync();
+  });
+
   /* ---- contact form -> mailto ---- */
   var form = document.querySelector("[data-mailto-form]");
   if (!form) return;

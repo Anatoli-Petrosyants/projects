@@ -72,6 +72,8 @@ ICONS = {
     "whatsapp": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.74.46 3.44 1.32 4.94L2 22l5.36-1.4a9.8 9.8 0 0 0 4.68 1.2h.01c5.43 0 9.84-4.4 9.84-9.84 0-2.63-1.02-5.1-2.88-6.96A9.78 9.78 0 0 0 12.04 2zm0 17.98h-.01a8.2 8.2 0 0 1-4.16-1.14l-.3-.18-3.1.81.83-3.02-.2-.31a8.13 8.13 0 0 1-1.25-4.3c0-4.51 3.68-8.18 8.2-8.18 2.19 0 4.24.85 5.79 2.4a8.13 8.13 0 0 1 2.4 5.79c0 4.52-3.68 8.13-8.2 8.13zm4.5-6.09c-.25-.13-1.46-.72-1.68-.8-.23-.08-.39-.13-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.09-.17.04-.31-.02-.44-.06-.12-.55-1.34-.76-1.83-.2-.48-.4-.42-.55-.42h-.47c-.16 0-.42.06-.64.31-.22.25-.84.82-.84 2s.86 2.32.98 2.48c.12.17 1.7 2.6 4.12 3.64.58.25 1.03.4 1.38.51.58.19 1.1.16 1.52.1.46-.07 1.46-.6 1.66-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.29z"/></svg>',
     "telegram": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.24 1.07-.88 1.33-1.78.83l-4.92-3.63-2.37 2.29c-.26.26-.48.48-.99.48l.36-5.02L18.1 6.2c.4-.35-.08-.55-.62-.2L6.2 13.14 1.35 11.6c-1.06-.33-1.08-1.06.22-1.57L20.53 2.7c.88-.33 1.65.2 1.37 1.6z"/></svg>',
     "logo": '<svg class="nav__logo" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.36 12.9c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.79-.41 6.92 1.16 9.18.77 1.11 1.68 2.35 2.88 2.31 1.16-.05 1.6-.75 3-.75s1.79.75 3.01.72c1.24-.02 2.03-1.13 2.79-2.24.88-1.28 1.24-2.53 1.26-2.6-.03-.01-2.42-.93-2.44-3.7zM14.1 5.2c.64-.78 1.07-1.86.95-2.94-.92.04-2.03.61-2.69 1.38-.59.69-1.11 1.79-.97 2.84 1.03.08 2.07-.52 2.71-1.28z"/></svg>',
+    "chevron-left": '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg>',
+    "chevron-right": '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg>',
     "arrow-left": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>',
     "sun": '<svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     "moon": '<svg class="icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
@@ -294,6 +296,51 @@ def app_card(project, prefix):
     <span class="app-card__meta">{'<span>' + '</span><span>'.join(meta) + '</span>'}</span>
   </span>
 </a>"""
+
+
+def screenshots(slug):
+    """Individual App Store screenshots for a project, in store order.
+
+    Populated by fetch_screenshots.py; empty until that has been run, in which
+    case the project page falls back to the single wide collage.
+    """
+    folder = ROOT / "assets" / "img" / "shots" / slug
+    if not folder.is_dir():
+        return []
+    return sorted(folder.glob("*.jpg"))
+
+
+def gallery(prefix, project, shots):
+    """A horizontally scrollable strip of one <img> per screenshot."""
+    slug = project["slug"]
+    name = project["name"]
+    total = len(shots)
+
+    items = ""
+    for number, path in enumerate(shots, start=1):
+        width, height = image_size(path)
+        items += (
+            '<li class="gallery__item">'
+            '<img src="%sassets/img/shots/%s/%s" alt="%s screenshot %d of %d"'
+            ' width="%d" height="%d" loading="lazy" decoding="async"></li>'
+            % (prefix, e(slug), e(path.name), e(name), number, total, width, height)
+        )
+
+    # The arrows ship hidden and main.js reveals them, so a no-JS visitor gets a
+    # plain scroller rather than two dead controls.
+    return (
+        '<div class="gallery reveal" data-gallery>'
+        '<button class="gallery__nav gallery__nav--prev" type="button" hidden'
+        ' data-gallery-step="-1" aria-label="Scroll to the first screenshot">%s</button>'
+        '<div class="gallery__viewport" role="region" tabindex="0"'
+        ' aria-label="%s screenshots, scroll horizontally">'
+        '<ul class="gallery__track">%s</ul>'
+        '</div>'
+        '<button class="gallery__nav gallery__nav--next" type="button" hidden'
+        ' data-gallery-step="1" aria-label="Scroll to the last screenshot">%s</button>'
+        '</div>'
+        % (ICONS["chevron-left"], e(name), items, ICONS["chevron-right"])
+    )
 
 
 # --------------------------------------------------------------------------
@@ -521,6 +568,18 @@ def build_project(index, project):
     page_url = f"{BASE_URL}/projects/{slug}.html"
     shot_width, shot_height = image_size(ROOT / "assets" / "img" / "apps" / f"{slug}.jpg")
 
+    shots = screenshots(slug)
+    if shots:
+        media = ('<p class="eyebrow">Screens</p>' + gallery(prefix, project, shots))
+        shot_urls = [f"{BASE_URL}/assets/img/shots/{slug}/{path.name}" for path in shots]
+    else:
+        media = (
+            f'<img class="shot reveal" src="{prefix}assets/img/apps/{e(slug)}.jpg"'
+            f' alt="Screenshots of the {e(project["name"])} iOS app"'
+            f' width="{shot_width}" height="{shot_height}" loading="lazy" decoding="async">'
+        )
+        shot_urls = [f"{BASE_URL}/assets/img/apps/{slug}.jpg"]
+
     app_schema = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -531,7 +590,7 @@ def build_project(index, project):
         "applicationSubCategory": project["genre"],
         "url": project["appStoreUrl"],
         "image": f"{BASE_URL}/assets/img/icons/{slug}.jpg",
-        "screenshot": f"{BASE_URL}/assets/img/apps/{slug}.jpg",
+        "screenshot": shot_urls,
         "datePublished": project["released"],
         "publisher": {"@type": "Organization", "name": project["seller"]},
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
@@ -585,11 +644,7 @@ def build_project(index, project):
   </section>
 
   <section class="section">
-    <div class="wrap">
-      <img class="shot reveal" src="{prefix}assets/img/apps/{e(slug)}.jpg"
-           alt="Screenshots of the {e(project['name'])} iOS app"
-           width="{shot_width}" height="{shot_height}" loading="lazy" decoding="async">
-    </div>
+    <div class="wrap">{media}</div>
   </section>
 
   <section class="section">

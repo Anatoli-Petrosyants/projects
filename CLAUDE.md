@@ -12,6 +12,7 @@ no bundler, no framework, no runtime dependencies. Python 3 stdlib only.
 
 ```sh
 python3 build.py                 # regenerate all HTML from data/*.json
+python3 fetch_screenshots.py     # refresh assets/img/shots/<slug>/ from the App Store
 python3 -m http.server 8000      # local preview at http://localhost:8000
 ```
 
@@ -32,10 +33,11 @@ Three layers:
    (an ordered map of category to tag list), `experience`, `education`,
    `experiments`, social `links`, and `baseUrl`.
 2. **`data/projects.json`** — an array of App Store apps, ordered as they appear
-   in the home grid. Each entry's `slug` is the contract that ties three things
+   in the home grid. Each entry's `slug` is the contract that ties four things
    together: the page path `projects/<slug>.html`, the icon
-   `assets/img/icons/<slug>.jpg`, and the screenshot `assets/img/apps/<slug>.png`.
-   Rename a slug and all three must move.
+   `assets/img/icons/<slug>.jpg`, the wide collage `assets/img/apps/<slug>.jpg`
+   and the per-screen gallery folder `assets/img/shots/<slug>/`.
+   Rename a slug and all four must move.
 3. **`build.py`** — templates as Python functions. `head()`, `header()`,
    `footer()` build shared chrome; `build_index()`, `build_project()`,
    `build_contact_redirect()`, `build_404()` build pages; `build_sitemap()` writes
@@ -115,6 +117,18 @@ curl -s "https://itunes.apple.com/lookup?id=<appStoreId>&country=us"
 ```
 
 Icons are downloaded from the `artworkUrl512` field in that response.
+
+Project pages show a horizontal screenshot gallery built from
+`assets/img/shots/<slug>/NN.jpg`, one file per App Store screenshot in store
+order. `fetch_screenshots.py` writes those: it reads the App Store id out of
+each project's `appStoreUrl`, pulls `screenshotUrls` from the same lookup API
+and re-requests each image at 540px wide (the mzstatic thumb URL takes any
+`<width>x0w.jpg` suffix). It wipes the folder first, so removing a screenshot on
+the App Store removes it from the site. `build.py` reads whatever files are
+there — delete the folder and the page falls back to the single wide collage.
+
+The collage in `assets/img/apps/<slug>.jpg` is still the `og:image` for the
+project page, since a wide image is what a social card wants.
 
 Screenshot collages are resized to 1400px wide and then converted to JPEG, which
 cut them from roughly 1 MB each to 250 KB with no visible loss — the source PNGs
