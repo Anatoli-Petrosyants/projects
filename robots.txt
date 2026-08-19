@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /404.html
 
-Sitemap: https://anatoli-petrosyants.github.io/projects/sitemap.xml
+Sitemap: https://anatolipetrosyants.dev/sitemap.xml

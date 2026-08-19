@@ -7,9 +7,11 @@ projects/<slug>.html, 404.html, sitemap.xml and robots.txt.
 No third-party dependencies. Run:  python3 build.py
 """
 
+import datetime
 import html
 import json
 import pathlib
+import struct
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -20,6 +22,33 @@ SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
 PROJECTS = json.loads((DATA / "projects.json").read_text(encoding="utf-8"))
 
 BASE_URL = SITE["baseUrl"].rstrip("/")
+BUILD_DATE = datetime.date.today().isoformat()
+
+
+def image_size(path):
+    """Read (width, height) from a PNG or JPEG file without decoding pixels."""
+    with open(path, "rb") as handle:
+        blob = handle.read()
+
+    if blob[:8] == b"\x89PNG\r\n\x1a\n":
+        return struct.unpack(">II", blob[16:24])
+
+    # JPEG: walk the marker segments until a start-of-frame carries the size.
+    pos = 2
+    while pos < len(blob):
+        if blob[pos] != 0xFF:
+            pos += 1
+            continue
+        marker = blob[pos + 1]
+        if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+            pos += 2
+            continue
+        length = struct.unpack(">H", blob[pos + 2:pos + 4])[0]
+        if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+            height, width = struct.unpack(">HH", blob[pos + 5:pos + 9])
+            return width, height
+        pos += 2 + length
+    raise ValueError("no size found in %s" % path)
 
 
 def e(value):
@@ -59,7 +88,33 @@ NAV = [
 ]
 
 
-def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg"):
+def link(prefix, href):
+    """Resolve a nav href, keeping the home page on its canonical directory URL."""
+    if href == "index.html":
+        return prefix or "./"
+    if href.startswith("index.html#"):
+        return (prefix or "./") + "#" + href.split("#", 1)[1]
+    return prefix + href
+
+
+def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg",
+         og_image_size=(900, 900), og_image_alt=None, og_type="website",
+         twitter_card="summary", noindex=False, preload=None):
+    """Render <head> plus the opening body tags.
+
+    `canonical` is the path under BASE_URL; pass "" for the home page so the
+    site resolves on a single canonical URL instead of both / and /index.html.
+    """
+    canonical_url = BASE_URL + "/" + canonical
+    robots = (
+        "noindex, nofollow" if noindex else
+        "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    )
+    alt = og_image_alt or title
+    preload_tag = ""
+    if preload:
+        preload_tag = f'\n<link rel="preload" as="image" href="{prefix}{preload}" fetchpriority="high">'
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,16 +123,29 @@ def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg
 <title>{e(title)}</title>
 <meta name="description" content="{e(description)}">
 <meta name="author" content="{e(SITE['name'])}">
-<link rel="canonical" href="{e(BASE_URL)}/{e(canonical)}">
-<meta property="og:type" content="website">
+<meta name="robots" content="{robots}">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#08080a">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbfbfd">
+<link rel="canonical" href="{e(canonical_url)}">
+<meta property="og:type" content="{og_type}">
+<meta property="og:site_name" content="{e(SITE['name'])}">
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(description)}">
-<meta property="og:url" content="{e(BASE_URL)}/{e(canonical)}">
+<meta property="og:url" content="{e(canonical_url)}">
 <meta property="og:image" content="{e(BASE_URL)}/{e(og_image)}">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image:width" content="{og_image_size[0]}">
+<meta property="og:image:height" content="{og_image_size[1]}">
+<meta property="og:image:alt" content="{e(alt)}">
+<meta name="twitter:card" content="{twitter_card}">
+<meta name="twitter:title" content="{e(title)}">
+<meta name="twitter:description" content="{e(description)}">
+<meta name="twitter:image" content="{e(BASE_URL)}/{e(og_image)}">
+<meta name="twitter:image:alt" content="{e(alt)}">
 <link rel="icon" href="{prefix}assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{prefix}assets/img/profile-sm.jpg">
-<link rel="stylesheet" href="{prefix}assets/css/style.css">
+<link rel="stylesheet" href="{prefix}assets/css/style.css">{preload_tag}
 <script>
   (function () {{
     try {{
@@ -95,7 +163,7 @@ def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg
 def header(prefix, current):
     links = []
     for href, label, optional in NAV:
-        target = prefix + href
+        target = link(prefix, href)
         aria = ' aria-current="page"' if href == current else ""
         klass = ' class="is-optional"' if optional else ""
         links.append(f'<a href="{target}"{aria}{klass}>{e(label)}</a>')
@@ -103,7 +171,7 @@ def header(prefix, current):
     return f"""<header class="site-header">
   <div class="wrap">
     <nav class="nav" aria-label="Main">
-      <a class="nav__brand" href="{prefix}index.html">
+      <a class="nav__brand" href="{link(prefix, "index.html")}">
         <img src="{prefix}assets/img/profile-sm.jpg" alt="" width="28" height="28">
         <span>{e(SITE['name'])}</span>
       </a>
@@ -147,20 +215,62 @@ def footer(prefix, fab=True):
 """
 
 
+def ld(payload):
+    """Wrap a JSON-LD payload in its script tag."""
+    return '<script type="application/ld+json">%s</script>' % json.dumps(payload)
+
+
+PERSON_REF = {"@type": "Person", "name": SITE["name"], "@id": BASE_URL + "/#person"}
+
+
 def person_schema():
-    payload = {
+    person = {
         "@context": "https://schema.org",
         "@type": "Person",
+        "@id": BASE_URL + "/#person",
         "name": SITE["name"],
         "jobTitle": SITE["role"],
+        "description": SITE["tagline"],
         "email": "mailto:" + SITE["email"],
         "telephone": SITE["phone"],
         "url": BASE_URL + "/",
         "image": BASE_URL + "/assets/img/profile.jpg",
         "sameAs": [SITE["links"]["linkedin"], SITE["links"]["github"], SITE["links"]["upwork"]],
-        "knowsAbout": ["iOS development", "Swift", "SwiftUI", "The Composable Architecture"],
+        "knowsAbout": [
+            "iOS development", "Swift", "SwiftUI", "UIKit", "Combine",
+            "The Composable Architecture", "HealthKit", "watchOS", "App Store release",
+        ],
+        "alumniOf": [
+            {"@type": "CollegeOrUniversity", "name": school["school"]}
+            for school in SITE["education"]
+        ],
+        "worksFor": {"@type": "Organization", "name": SITE["experience"][0]["company"]},
     }
-    return '<script type="application/ld+json">%s</script>' % json.dumps(payload)
+    website = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": BASE_URL + "/#website",
+        "url": BASE_URL + "/",
+        "name": SITE["name"],
+        "description": SITE["tagline"],
+        "inLanguage": "en",
+        "publisher": {"@id": BASE_URL + "/#person"},
+    }
+    portfolio = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "iOS apps by " + SITE["name"],
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": f"{BASE_URL}/projects/{project['slug']}.html",
+                "name": project["name"],
+            }
+            for index, project in enumerate(PROJECTS)
+        ],
+    }
+    return ld(person) + ld(website) + ld(portfolio)
 
 
 # --------------------------------------------------------------------------
@@ -243,7 +353,8 @@ def build_index():
         </div>
       </div>
       <img class="hero__photo" src="assets/img/profile.jpg"
-           alt="Portrait of {e(SITE['name'])}" width="900" height="900">
+           alt="Portrait of {e(SITE['name'])}, {e(SITE['role'])}"
+           width="900" height="900" fetchpriority="high" decoding="async">
     </div>
   </section>
 
@@ -318,10 +429,13 @@ def build_index():
 {footer('')}"""
 
     page = head(
-        f"{SITE['name']} · {SITE['role']}",
-        SITE["tagline"],
+        f"{SITE['name']} · {SITE['role']} · Swift & SwiftUI",
+        SITE["tagline"] + f" {len(PROJECTS)} App Store apps, 30+ shipped in total.",
         "",
-        "index.html",
+        "",
+        og_image_alt=f"Portrait of {SITE['name']}",
+        og_type="profile",
+        preload="assets/img/profile.jpg",
     ) + body
     (ROOT / "index.html").write_text(page, encoding="utf-8")
 
@@ -355,20 +469,46 @@ def build_project(index, project):
     prev_project = PROJECTS[index - 1]
     next_project = PROJECTS[(index + 1) % len(PROJECTS)]
 
-    schema = json.dumps({
+    page_url = f"{BASE_URL}/projects/{slug}.html"
+    shot_width, shot_height = image_size(ROOT / "assets" / "img" / "apps" / f"{slug}.jpg")
+
+    app_schema = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": project["name"],
+        "description": project["tagline"],
         "operatingSystem": "iOS",
         "applicationCategory": "MobileApplication",
+        "applicationSubCategory": project["genre"],
         "url": project["appStoreUrl"],
-        "author": {"@type": "Person", "name": SITE["name"]},
+        "image": f"{BASE_URL}/assets/img/icons/{slug}.jpg",
+        "screenshot": f"{BASE_URL}/assets/img/apps/{slug}.jpg",
+        "datePublished": project["released"],
+        "publisher": {"@type": "Organization", "name": project["seller"]},
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
         "aggregateRating": {
             "@type": "AggregateRating",
             "ratingValue": project["rating"],
             "ratingCount": project["ratingCount"].replace(",", ""),
+            "bestRating": "5",
+            "worstRating": "1",
         },
-    })
+    }
+    if project["ownership"] == "own":
+        app_schema["author"] = PERSON_REF
+    else:
+        app_schema["contributor"] = PERSON_REF
+
+    breadcrumbs = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": BASE_URL + "/"},
+            {"@type": "ListItem", "position": 2, "name": "Work", "item": BASE_URL + "/#work"},
+            {"@type": "ListItem", "position": 3, "name": project["name"], "item": page_url},
+        ],
+    }
+    schema = ld(app_schema) + ld(breadcrumbs)
 
     body = f"""{header(prefix, '')}
 <main id="main">
@@ -397,8 +537,9 @@ def build_project(index, project):
 
   <section class="section">
     <div class="wrap">
-      <img class="shot reveal" src="{prefix}assets/img/apps/{e(slug)}.png"
-           alt="{e(project['name'])} app screenshots" loading="lazy">
+      <img class="shot reveal" src="{prefix}assets/img/apps/{e(slug)}.jpg"
+           alt="Screenshots of the {e(project['name'])} iOS app"
+           width="{shot_width}" height="{shot_height}" loading="lazy" decoding="async">
     </div>
   </section>
 
@@ -424,15 +565,19 @@ def build_project(index, project):
     </div>
   </section>
 </main>
-<script type="application/ld+json">{schema}</script>
+{schema}
 {footer(prefix)}"""
 
     page = head(
-        f"{project['name']} · {SITE['name']}",
-        project["tagline"],
+        f"{project['name']} · iOS app by {SITE['name']}",
+        f"{project['tagline']} {project['role']} on {project['name']}, "
+        f"rated {project['rating']} on the App Store.",
         prefix,
         f"projects/{slug}.html",
-        og_image=f"assets/img/apps/{slug}.png",
+        og_image=f"assets/img/apps/{slug}.jpg",
+        og_image_size=(shot_width, shot_height),
+        og_image_alt=f"Screenshots of the {project['name']} iOS app",
+        twitter_card="summary_large_image",
     ) + body
 
     PROJECT_DIR.mkdir(exist_ok=True)
@@ -505,9 +650,11 @@ def build_contact():
 
     page = head(
         f"Contact · {SITE['name']}",
-        f"Get in touch with {SITE['name']}, {SITE['role'].lower()} open to contract and full-time work.",
+        f"Get in touch with {SITE['name']}, {SITE['role'].lower()} open to contract and "
+        f"full-time work. Email, phone, WhatsApp, Telegram, LinkedIn and Upwork.",
         "",
         "contact.html",
+        og_type="profile",
     ) + body
     (ROOT / "contact.html").write_text(page, encoding="utf-8")
 
@@ -522,18 +669,29 @@ def build_404():
       <p class="lead" style="margin:16px auto 32px">
         The link is broken or the page moved. The work is all one click away.
       </p>
-      <a class="btn btn--primary" href="{e(BASE_URL)}/index.html">Back to home</a>
+      <a class="btn btn--primary" href="{e(BASE_URL)}/">Back to home</a>
     </div>
   </section>
 </main>
 {footer('')}"""
-    page = head(f"Page not found · {SITE['name']}", "Page not found.", "", "404.html") + body
+    page = head(f"Page not found · {SITE['name']}", "Page not found.", "", "404.html",
+                noindex=True) + body
     (ROOT / "404.html").write_text(page, encoding="utf-8")
 
 
 def build_sitemap():
-    urls = ["index.html", "contact.html"] + [f"projects/{p['slug']}.html" for p in PROJECTS]
-    entries = "".join(f"  <url><loc>{BASE_URL}/{u}</loc></url>\n" for u in urls)
+    urls = [("", "1.0", "monthly"), ("contact.html", "0.7", "yearly")]
+    urls += [(f"projects/{p['slug']}.html", "0.8", "monthly") for p in PROJECTS]
+
+    entries = "".join(
+        "  <url>\n"
+        f"    <loc>{BASE_URL}/{path}</loc>\n"
+        f"    <lastmod>{BUILD_DATE}</lastmod>\n"
+        f"    <changefreq>{freq}</changefreq>\n"
+        f"    <priority>{priority}</priority>\n"
+        "  </url>\n"
+        for path, priority, freq in urls
+    )
     (ROOT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -541,8 +699,19 @@ def build_sitemap():
         encoding="utf-8",
     )
     (ROOT / "robots.txt").write_text(
-        f"User-agent: *\nAllow: /\n\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8"
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /404.html\n"
+        "\n"
+        f"Sitemap: {BASE_URL}/sitemap.xml\n",
+        encoding="utf-8",
     )
+
+
+def build_cname():
+    """GitHub Pages reads the custom domain from this file."""
+    host = BASE_URL.split("://", 1)[1].rstrip("/")
+    (ROOT / "CNAME").write_text(host + "\n", encoding="utf-8")
 
 
 def main():
@@ -552,7 +721,9 @@ def main():
         build_project(index, project)
     build_404()
     build_sitemap()
-    print(f"built: index.html, contact.html, 404.html, {len(PROJECTS)} project pages, sitemap.xml, robots.txt")
+    build_cname()
+    print(f"built: index.html, contact.html, 404.html, {len(PROJECTS)} project pages, "
+          "sitemap.xml, robots.txt, CNAME")
 
 
 if __name__ == "__main__":
