@@ -120,9 +120,15 @@ def header(prefix, current):
 """
 
 
-def footer(prefix):
+def footer(prefix, fab=True):
     links = SITE["links"]
-    return f"""<footer class="site-footer">
+    fab_html = ""
+    if fab:
+        fab_html = (
+            f'<a class="fab" href="{prefix}contact.html" aria-label="Get in touch">'
+            f"{ICONS['mail']}<span>Get in touch</span></a>\n"
+        )
+    return fab_html + f"""<footer class="site-footer">
   <div class="wrap">
     <span>&copy; 2026 {e(SITE['name'])}. Built as static HTML, hosted on GitHub Pages.</span>
     <span class="footer-links">
@@ -232,7 +238,6 @@ def build_index():
         <p class="lead">{e(SITE['tagline'])}</p>
         <div class="hero__actions">
           <a class="btn btn--primary" href="#work">See the work</a>
-          <a class="btn btn--ghost" href="contact.html">{ICONS['mail']}Get in touch</a>
           <a class="btn btn--ghost" href="{e(SITE['links']['cv'])}" download>{ICONS['download']}Download CV</a>
           <a class="btn btn--ghost" href="{e(SITE['links']['github'])}" rel="noopener" target="_blank">{ICONS['github']}GitHub</a>
         </div>
@@ -496,7 +501,7 @@ def build_contact():
     </div>
   </section>
 </main>
-{footer('')}"""
+{footer('', fab=False)}"""
 
     page = head(
         f"Contact · {SITE['name']}",
