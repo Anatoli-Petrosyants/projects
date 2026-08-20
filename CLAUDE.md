@@ -99,9 +99,19 @@ reads `localStorage.theme` before first paint to avoid a flash.
 
 ### JavaScript
 
-`assets/js/main.js` is one IIFE, no modules, loaded with `defer`. It does three
+`assets/js/main.js` is one IIFE, no modules, loaded with `defer`. It does four
 things: theme toggle, `IntersectionObserver` scroll reveal for `.reveal`
-elements, and the contact form. The form is wired by the `data-mailto-form`
+elements, the screenshot lightbox, and the contact form.
+
+The lightbox turns each gallery thumbnail into a button that opens the project
+page's `<dialog class="lightbox">` on the same image file, with on-screen arrows
+and the left/right keys walking the strip. Escape and the backdrop close it
+natively. That dialog is deliberately a sibling of `.gallery__strip` rather than
+a child: `.reveal` animates `opacity` and `transform`, and a modal dialog nested
+inside one inherits the fade even though it is painted in the top layer. Browsers
+without `showModal` drop the dialog and keep a plain scrollable strip.
+
+The form is wired by the `data-mailto-form`
 attribute whose value is the destination address; it validates client-side and
 then sets `window.location.href` to a `mailto:` URL. Nothing is posted to a
 server — that is deliberate, since GitHub Pages is static-only.
@@ -123,7 +133,10 @@ Project pages show a horizontal screenshot gallery built from
 order. `fetch_screenshots.py` writes those: it reads the App Store id out of
 each project's `appStoreUrl`, pulls `screenshotUrls` from the same lookup API
 and re-requests each image at 540px wide (the mzstatic thumb URL takes any
-`<width>x0w.jpg` suffix). It wipes the folder first, so removing a screenshot on
+`<width>x0w.jpg` suffix). That 540px is also the ceiling on how sharp the
+lightbox can get, since it shows the same file; raising `WIDTH` and re-running
+the script is what buys more detail, at roughly 3x the ~5 MB the folders weigh
+today. It wipes the folder first, so removing a screenshot on
 the App Store removes it from the site. `build.py` reads whatever files are
 there — delete the folder and the page falls back to the single wide collage.
 

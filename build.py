@@ -74,6 +74,7 @@ ICONS = {
     "logo": '<svg class="nav__logo" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M16.36 12.9c-.02-2.3 1.88-3.4 1.96-3.45-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.79-.41 6.92 1.16 9.18.77 1.11 1.68 2.35 2.88 2.31 1.16-.05 1.6-.75 3-.75s1.79.75 3.01.72c1.24-.02 2.03-1.13 2.79-2.24.88-1.28 1.24-2.53 1.26-2.6-.03-.01-2.42-.93-2.44-3.7zM14.1 5.2c.64-.78 1.07-1.86.95-2.94-.92.04-2.03.61-2.69 1.38-.59.69-1.11 1.79-.97 2.84 1.03.08 2.07-.52 2.71-1.28z"/></svg>',
     "chevron-left": '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 4-8 8 8 8"/></svg>',
     "chevron-right": '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg>',
+    "close": '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>',
     "arrow-left": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>',
     "sun": '<svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     "moon": '<svg class="icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
@@ -311,7 +312,11 @@ def screenshots(slug):
 
 
 def gallery(prefix, project, shots):
-    """A horizontally scrollable strip of one <img> per screenshot."""
+    """A horizontally scrollable strip of one <img> per screenshot.
+
+    Each thumbnail is a button that opens the lightbox <dialog> that follows the
+    strip, so a screenshot can be inspected at close to its native size.
+    """
     slug = project["slug"]
     name = project["name"]
     total = len(shots)
@@ -321,15 +326,22 @@ def gallery(prefix, project, shots):
         width, height = image_size(path)
         items += (
             '<li class="gallery__item">'
+            '<button class="gallery__zoom" type="button" data-gallery-open="%d"'
+            ' aria-label="View %s screenshot %d of %d larger">'
             '<img src="%sassets/img/shots/%s/%s" alt="%s screenshot %d of %d"'
-            ' width="%d" height="%d" loading="lazy" decoding="async"></li>'
-            % (prefix, e(slug), e(path.name), e(name), number, total, width, height)
+            ' width="%d" height="%d" loading="lazy" decoding="async">'
+            '</button></li>'
+            % (
+                number - 1, e(name), number, total,
+                prefix, e(slug), e(path.name), e(name), number, total,
+                width, height,
+            )
         )
 
     # The arrows ship hidden and main.js reveals them, so a no-JS visitor gets a
     # plain scroller rather than two dead controls.
-    return (
-        '<div class="gallery reveal" data-gallery>'
+    strip = (
+        '<div class="gallery__strip reveal">'
         '<button class="gallery__nav gallery__nav--prev" type="button" hidden'
         ' data-gallery-step="-1" aria-label="Scroll to the first screenshot">%s</button>'
         '<div class="gallery__viewport" role="region" tabindex="0"'
@@ -341,6 +353,33 @@ def gallery(prefix, project, shots):
         '</div>'
         % (ICONS["chevron-left"], e(name), items, ICONS["chevron-right"])
     )
+
+    # The <img> is created by main.js from the thumbnail that was clicked, which
+    # is also where its width/height come from -- an empty <img> in the output
+    # would be a dimensionless image on every project page.
+    lightbox = (
+        '<dialog class="lightbox" data-gallery-lightbox tabindex="-1"'
+        ' aria-label="%s screenshots, larger view">'
+        '<button class="lightbox__close" type="button" data-lightbox-close'
+        ' aria-label="Close the larger view">%s</button>'
+        '<div class="lightbox__stage">'
+        '<button class="lightbox__nav lightbox__nav--prev" type="button"'
+        ' data-lightbox-step="-1" aria-label="Previous screenshot">%s</button>'
+        '<figure class="lightbox__figure" data-lightbox-figure></figure>'
+        '<button class="lightbox__nav lightbox__nav--next" type="button"'
+        ' data-lightbox-step="1" aria-label="Next screenshot">%s</button>'
+        '</div>'
+        '<p class="lightbox__count" data-lightbox-count aria-live="polite"></p>'
+        '</dialog>'
+        % (
+            e(name), ICONS["close"],
+            ICONS["chevron-left"], ICONS["chevron-right"],
+        )
+    )
+
+    # The lightbox sits outside .reveal: a modal dialog is painted in the top
+    # layer, and an ancestor mid-transition opacity would still fade it.
+    return '<div class="gallery" data-gallery>%s%s</div>' % (strip, lightbox)
 
 
 # --------------------------------------------------------------------------

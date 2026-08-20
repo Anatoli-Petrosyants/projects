@@ -306,7 +306,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 }
 
 /* horizontal screenshot strip on project pages */
-.gallery { position: relative; }
+.gallery__strip { position: relative; }
 .gallery__viewport {
   overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x proximity; overscroll-behavior-x: contain;
@@ -329,7 +329,15 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
   display: block; width: 270px; height: auto;
   border-radius: 20px; border: 1px solid var(--border);
   background: var(--bg-elev); box-shadow: var(--shadow);
+  transition: transform .18s ease;
 }
+/* the thumbnail is a button so it takes a tap, a click and the keyboard alike */
+.gallery__zoom {
+  display: block; padding: 0; border: 0; background: none;
+  border-radius: 20px; cursor: zoom-in; -webkit-tap-highlight-color: transparent;
+}
+.gallery__zoom:hover img { transform: translateY(-3px); }
+.gallery__zoom:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 
 /* App Store style chevrons, parked in the gutter beside the strip */
 .gallery__nav {
@@ -365,9 +373,75 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 }
 @media (max-width: 640px) {
   .gallery__item img { width: 200px; border-radius: 16px; }
+  .gallery__zoom { border-radius: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .gallery__viewport { scroll-behavior: auto; }
+  .gallery__item img { transition: none; }
+  .gallery__zoom:hover img { transform: none; }
+}
+
+/* one screenshot, as large as the viewport allows */
+.lightbox {
+  width: 100%; max-width: 100%; height: 100%; max-height: 100%;
+  margin: 0; padding: 0; border: 0; background: transparent;
+  color: var(--text); overflow: hidden;
+}
+.lightbox[open] { display: grid; place-items: center; }
+/* the dialog only takes focus so the arrow keys land somewhere on open */
+.lightbox:focus { outline: none; }
+.lightbox::backdrop { background: rgba(4, 5, 8, .88); }
+/* the arrows flank the screenshot rather than the viewport, so they stay within
+   reach of wherever the eye already is */
+.lightbox__stage { display: flex; align-items: center; gap: 18px; max-width: 100%; }
+.lightbox__figure { margin: 0; display: grid; place-items: center; min-width: 0; }
+.lightbox__image {
+  display: block; width: auto; height: auto;
+  max-width: min(calc(100vw - 180px), 620px); max-height: 86dvh;
+  border-radius: 22px; border: 1px solid var(--border-strong);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .6);
+}
+.lightbox__close, .lightbox__nav {
+  z-index: 1; display: grid; place-items: center;
+  padding: 0; border-radius: 999px; cursor: pointer;
+  background: var(--bg-elev); border: 1px solid var(--border-strong);
+  color: var(--text); box-shadow: var(--shadow);
+  transition: background-color .15s ease, transform .15s ease, opacity .15s ease;
+}
+.lightbox__close:hover, .lightbox__nav:hover { background: var(--bg-elev-2); transform: scale(1.06); }
+.lightbox__close:active, .lightbox__nav:active { transform: scale(.94); }
+/* a neutral ring rather than the accent: on a dimmed backdrop the blue reads as
+   a selected control instead of a keyboard position */
+.lightbox__close:focus-visible, .lightbox__nav:focus-visible {
+  outline: 2px solid var(--text); outline-offset: 3px;
+}
+.lightbox__close { position: fixed; top: 18px; right: 18px; width: 42px; height: 42px; }
+.lightbox__nav { flex: 0 0 auto; width: 46px; height: 46px; }
+/* our display:grid would otherwise beat the browser's [hidden] rule */
+.lightbox__nav[hidden] { display: none; }
+.lightbox__count {
+  position: fixed; bottom: 18px; left: 50%; translate: -50% 0;
+  margin: 0; padding: 5px 14px; border-radius: 999px;
+  font-size: .8rem; letter-spacing: .04em; color: var(--text-dim);
+  background: var(--bg-elev); border: 1px solid var(--border);
+}
+/* the dialog is modal, but the page behind it still scrolls on some browsers */
+html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
+
+/* no room to flank a phone-width screenshot: the arrows move onto its lower
+   corners, where a thumb reaches them anyway */
+@media (max-width: 640px) {
+  .lightbox__stage { position: relative; gap: 0; }
+  .lightbox__image { max-width: 94vw; max-height: 78dvh; border-radius: 18px; }
+  .lightbox__nav { position: absolute; bottom: 12px; width: 40px; height: 40px; }
+  .lightbox__nav--prev { left: 12px; }
+  .lightbox__nav--next { right: 12px; }
+  .lightbox__close { top: 12px; right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox__close, .lightbox__nav { transition: none; }
+  .lightbox__close:hover, .lightbox__nav:hover,
+  .lightbox__close:active, .lightbox__nav:active { transform: none; }
 }
 .prose p + p { margin-top: 16px; }
 .prose { color: var(--text-dim); max-width: 68ch; }

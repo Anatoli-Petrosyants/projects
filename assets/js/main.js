@@ -38,6 +38,88 @@
     }
   }
 
+  /* ---- screenshot lightbox ---- */
+  /* A thumbnail is only 270px wide, so tapping one opens the same file in a
+     modal <dialog> sized to the viewport, with the arrow keys and the on-screen
+     arrows walking the strip without closing it. */
+  function lightbox(gallery) {
+    var dialog = gallery.querySelector("[data-gallery-lightbox]");
+    var openers = gallery.querySelectorAll("[data-gallery-open]");
+    /* no <dialog> support: the thumbnails stay plain, scrollable pictures */
+    if (!dialog || !openers.length || typeof dialog.showModal !== "function") {
+      if (dialog) dialog.remove();
+      openers.forEach(function (button) { button.style.cursor = "default"; });
+      return;
+    }
+
+    var figure = dialog.querySelector("[data-lightbox-figure]");
+    var counter = dialog.querySelector("[data-lightbox-count]");
+    var steps = dialog.querySelectorAll("[data-lightbox-step]");
+    var closer = dialog.querySelector("[data-lightbox-close]");
+    var thumbs = [];
+    openers.forEach(function (button) { thumbs.push(button.querySelector("img")); });
+    var index = 0;
+    var opener = null;
+
+    function show(wanted) {
+      index = (wanted + thumbs.length) % thumbs.length;
+      var thumb = thumbs[index];
+      var big = document.createElement("img");
+      big.className = "lightbox__image";
+      /* the attributes, not the layout size: these are the file's real pixels */
+      big.width = Number(thumb.getAttribute("width"));
+      big.height = Number(thumb.getAttribute("height"));
+      big.alt = thumb.alt;
+      big.decoding = "async";
+      big.src = thumb.currentSrc || thumb.src;
+      figure.textContent = "";
+      figure.appendChild(big);
+      counter.textContent = index + 1 + " of " + thumbs.length;
+      steps.forEach(function (button) { button.hidden = thumbs.length < 2; });
+      /* keep the strip behind the dialog on the screenshot being looked at */
+      openers[index].scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+
+    openers.forEach(function (button) {
+      button.addEventListener("click", function () {
+        opener = button;
+        show(Number(button.getAttribute("data-gallery-open")));
+        document.documentElement.classList.add("is-lightbox-open");
+        dialog.showModal();
+        /* the dialog, not the close button: focusing a control would ring it */
+        dialog.focus();
+      });
+    });
+
+    steps.forEach(function (button) {
+      button.addEventListener("click", function () {
+        show(index + Number(button.getAttribute("data-lightbox-step")));
+      });
+    });
+
+    if (closer) {
+      closer.addEventListener("click", function () { dialog.close(); });
+    }
+
+    /* the figure is centred in a full-viewport dialog, so anything outside it
+       is backdrop as far as the visitor is concerned */
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog || event.target === figure) dialog.close();
+    });
+
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowRight") { event.preventDefault(); show(index + 1); }
+      else if (event.key === "ArrowLeft") { event.preventDefault(); show(index - 1); }
+    });
+
+    /* Escape closes natively, so undo the scroll lock on the event, not the button */
+    dialog.addEventListener("close", function () {
+      document.documentElement.classList.remove("is-lightbox-open");
+      figure.textContent = "";
+      if (opener) opener.focus();
+    });
+  }
+
   /* ---- screenshot galleries ---- */
   document.querySelectorAll("[data-gallery]").forEach(function (gallery) {
     var viewport = gallery.querySelector(".gallery__viewport");
@@ -82,6 +164,7 @@
     }, { passive: true });
 
     window.addEventListener("resize", sync);
+    lightbox(gallery);
     /* images are lazy, so scrollWidth only settles once they have loaded */
     viewport.querySelectorAll("img").forEach(function (image) {
       if (!image.complete) image.addEventListener("load", sync, { once: true });
