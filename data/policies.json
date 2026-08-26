@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "ctrltv",
+    "app": "CtrlTV: Smart TV Remote",
+    "project": "ctrltv",
+    "source": "ctrltv.md",
+    "updated": "2026-05-06"
+  },
+  {
+    "slug": "palettes-lab",
+    "app": "Palettes Lab",
+    "project": "palettes-lab",
+    "source": "palettes-lab.md",
+    "updated": "2024-12-26"
+  },
+  {
+    "slug": "savedock",
+    "app": "Savedock",
+    "project": null,
+    "source": "savedock.md",
+    "updated": "2026-08-03"
+  }
+]

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Static site generator for the portfolio.
 
-Reads data/site.json + data/projects.json, writes index.html (contact lives in
-its #contact section), contact.html (a redirect stub for the old URL),
-projects/<slug>.html, 404.html, sitemap.xml and robots.txt.
+Reads data/site.json + data/projects.json + data/policies.json (whose bodies
+live in data/policies/*.md), writes index.html (contact lives in its #contact
+section), contact.html (a redirect stub for the old URL), projects/<slug>.html,
+privacy/<slug>.html, 404.html, sitemap.xml and robots.txt.
 
 No third-party dependencies. Run:  python3 build.py
 """
@@ -12,15 +13,20 @@ import datetime
 import html
 import json
 import pathlib
+import re
 import struct
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / "data"
 PROJECT_DIR = ROOT / "projects"
+PRIVACY_DIR = ROOT / "privacy"
+POLICY_DIR = DATA / "policies"
 
 SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
 PROJECTS = json.loads((DATA / "projects.json").read_text(encoding="utf-8"))
+POLICIES = json.loads((DATA / "policies.json").read_text(encoding="utf-8"))
+POLICY_BY_PROJECT = {p["project"]: p for p in POLICIES if p.get("project")}
 
 BASE_URL = SITE["baseUrl"].rstrip("/")
 BUILD_DATE = datetime.date.today().isoformat()
@@ -211,6 +217,7 @@ def footer(prefix, fab=True):
       <a href="{e(links['linkedin'])}" rel="noopener" target="_blank">LinkedIn</a>
       <a href="{e(links['github'])}" rel="noopener" target="_blank">GitHub</a>
       <a href="{e(links['upwork'])}" rel="noopener" target="_blank">Upwork</a>
+      <a href="{prefix}privacy/">Privacy</a>
       <a href="{prefix}{e(links['cv'])}" download>CV</a>
     </span>
   </div>
@@ -601,6 +608,14 @@ def build_project(index, project):
     badge = '<span class="badge">My app</span>' if project["ownership"] == "own" else \
             '<span class="badge badge--neutral">Client work</span>'
 
+    policy = POLICY_BY_PROJECT.get(slug)
+    privacy_link = ""
+    if policy:
+        privacy_link = (
+            '<a class="btn btn--ghost" href="%sprivacy/%s.html">Privacy policy</a>'
+            % (prefix, e(policy["slug"]))
+        )
+
     prev_project = PROJECTS[index - 1]
     next_project = PROJECTS[(index + 1) % len(PROJECTS)]
 
@@ -674,6 +689,7 @@ def build_project(index, project):
             <a class="btn btn--primary" href="{e(project['appStoreUrl'])}" rel="noopener" target="_blank">
               {ICONS['appstore']}View on the App Store
             </a>
+            {privacy_link}
           </div>
         </div>
       </div>
@@ -727,6 +743,285 @@ def build_project(index, project):
     (PROJECT_DIR / f"{slug}.html").write_text(page, encoding="utf-8")
 
 
+# --------------------------------------------------------------------------
+# privacy policies
+# --------------------------------------------------------------------------
+
+INLINE_RE = re.compile(
+    r"\[(?P<label>[^\]]+)\]\((?P<href>[^)\s]+)\)"   # [label](url)
+    r"|\*\*(?P<strong>[^*]+)\*\*"                     # **bold**
+    r"|\*(?P<em>[^*]+)\*"                              # *italic*
+    r"|(?P<mail>[\w.+-]+@[\w-]+\.[\w.-]*\w)"          # bare email address
+)
+
+
+def inline(text):
+    """Escape one line of markdown, then expand its inline markup to HTML.
+
+    Escaping happens per fragment, before any tag is emitted, so a policy that
+    ever contains a literal < or & still lands in the page as text.
+    """
+    out = []
+    pos = 0
+    for match in INLINE_RE.finditer(text):
+        out.append(e(text[pos:match.start()]))
+        pos = match.end()
+        if match.group("label") is not None:
+            out.append('<a href="%s" rel="noopener" target="_blank">%s</a>'
+                       % (e(match.group("href")), e(match.group("label"))))
+        elif match.group("strong") is not None:
+            out.append("<strong>%s</strong>" % e(match.group("strong")))
+        elif match.group("em") is not None:
+            out.append("<em>%s</em>" % e(match.group("em")))
+        else:
+            address = e(match.group("mail"))
+            out.append('<a href="mailto:%s">%s</a>' % (address, address))
+    out.append(e(text[pos:]))
+    return "".join(out)
+
+
+BULLET_RE = re.compile(r"^(?P<indent>\s*)[-*]\s+(?P<body>.*)$")
+HEADING_RE = re.compile(r"^(?P<hashes>#{1,6})\s+(?P<body>.*)$")
+
+
+def render_list(items, start):
+    """Serialize a run of (depth, html) bullets into nested <ul>, from `start`."""
+    depth = items[start][0]
+    out = ['<ul class="policy__list">']
+    index = start
+    while index < len(items) and items[index][0] >= depth:
+        if items[index][0] > depth:
+            break
+        out.append("<li>" + items[index][1])
+        index += 1
+        if index < len(items) and items[index][0] > depth:
+            nested, index = render_list(items, index)
+            out.append(nested)
+        out.append("</li>")
+    out.append("</ul>")
+    return "".join(out), index
+
+
+def render_markdown(text):
+    """Render the markdown subset the policy files use.
+
+    Handles ## headings, --- rules, - bullets (nested by two-space indent) and
+    paragraphs, plus the inline markup above. That is everything in
+    data/policies/*.md; anything richer needs a branch here, not a dependency.
+    The document's own `# Heading` is dropped: the page hero owns the <h1> and
+    already says the page is a privacy policy.
+    """
+    out = []
+    pending = []
+
+    def flush():
+        if not pending:
+            return
+        index = 0
+        while index < len(pending):
+            fragment, index = render_list(pending, index)
+            out.append(fragment)
+        del pending[:]
+
+    for raw in text.replace("\r\n", "\n").split("\n"):
+        line = raw.rstrip()
+        stripped = line.strip()
+
+        if not stripped:
+            continue
+
+        bullet = BULLET_RE.match(line)
+        if bullet:
+            pending.append((len(bullet.group("indent")) // 2, inline(bullet.group("body"))))
+            continue
+
+        flush()
+
+        if set(stripped) <= set("-*_") and len(stripped) >= 3:
+            out.append("<hr>")
+            continue
+
+        heading = HEADING_RE.match(stripped)
+        if heading:
+            level = len(heading.group("hashes"))
+            if level == 1:
+                # the page hero already carries the <h1> and says "Privacy",
+                # so the document's own "# Privacy Policy" would only repeat it
+                continue
+            out.append("<h%d>%s</h%d>" % (level, inline(heading.group("body")), level))
+            continue
+
+        out.append("<p>%s</p>" % inline(stripped))
+
+    flush()
+    return "".join(out)
+
+
+def build_privacy(policy):
+    prefix = "../"
+    slug = policy["slug"]
+    app = policy["app"]
+    project = next((p for p in PROJECTS if p["slug"] == policy.get("project")), None)
+
+    body_html = render_markdown((POLICY_DIR / policy["source"]).read_text(encoding="utf-8"))
+
+    actions = []
+    if project:
+        actions.append(
+            '<a class="btn btn--ghost" href="%sprojects/%s.html">%sBack to %s</a>'
+            % (prefix, e(project["slug"]), ICONS["arrow-left"], e(project["name"]))
+        )
+        actions.append(
+            '<a class="btn btn--ghost" href="%s" rel="noopener" target="_blank">%sView on the App Store</a>'
+            % (e(project["appStoreUrl"]), ICONS["appstore"])
+        )
+    actions.append(
+        '<a class="btn btn--ghost" href="mailto:%s">%sContact</a>'
+        % (e(SITE["email"]), ICONS["mail"])
+    )
+
+    og_image = "assets/img/profile.jpg"
+    og_size = (900, 900)
+    card = "summary"
+    if project:
+        og_image = "assets/img/apps/%s.jpg" % project["slug"]
+        og_size = image_size(ROOT / "assets" / "img" / "apps" / (project["slug"] + ".jpg"))
+        card = "summary_large_image"
+
+    schema = ld({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": app + " privacy policy",
+        "url": "%s/privacy/%s.html" % (BASE_URL, slug),
+        "dateModified": policy["updated"],
+        "inLanguage": "en",
+        "publisher": PERSON_REF,
+        "about": {"@type": "SoftwareApplication", "name": app, "operatingSystem": "iOS"},
+    })
+
+    breadcrumbs = [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": BASE_URL + "/"},
+    ]
+    if project:
+        breadcrumbs.append({
+            "@type": "ListItem", "position": 2, "name": project["name"],
+            "item": "%s/projects/%s.html" % (BASE_URL, project["slug"]),
+        })
+    breadcrumbs.append({
+        "@type": "ListItem", "position": len(breadcrumbs) + 1, "name": "Privacy policy",
+        "item": "%s/privacy/%s.html" % (BASE_URL, slug),
+    })
+    schema += ld({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": breadcrumbs,
+    })
+
+    page_body = """%s
+<main id="main">
+  <section class="section" style="padding-bottom:0">
+    <div class="wrap">
+      <a class="back-link" href="%sindex.html#work">%sAll work</a>
+
+      <p class="eyebrow" style="margin-bottom:10px">Privacy</p>
+      <h1>%s</h1>
+      <p class="lead">How the app handles your data. Last updated %s.</p>
+      <div class="hero__actions">%s</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <article class="policy">%s</article>
+    </div>
+  </section>
+</main>
+%s
+%s""" % (
+        header(prefix, ""),
+        prefix,
+        ICONS["arrow-left"],
+        e(app),
+        e(policy["updated"]),
+        "".join(actions),
+        body_html,
+        schema,
+        footer(prefix),
+    )
+
+    page = head(
+        "%s privacy policy · %s" % (app, SITE["name"]),
+        "Privacy policy for the %s iOS app: what it collects, where the data is "
+        "stored and who it is shared with." % app,
+        prefix,
+        "privacy/%s.html" % slug,
+        og_image=og_image,
+        og_image_size=og_size,
+        og_image_alt="%s privacy policy" % app,
+        og_type="article",
+        twitter_card=card,
+    ) + page_body
+
+    PRIVACY_DIR.mkdir(exist_ok=True)
+    (PRIVACY_DIR / (slug + ".html")).write_text(page, encoding="utf-8")
+
+
+def build_privacy_index():
+    """A hub for /privacy/, so every policy is reachable by a crawler.
+
+    Savedock has no project page, so without this its policy would sit in the
+    sitemap with nothing linking to it.
+    """
+    prefix = "../"
+    rows = []
+    for policy in POLICIES:
+        project = next((p for p in PROJECTS if p["slug"] == policy.get("project")), None)
+        icon = ""
+        if project:
+            icon = (
+                '<img class="app-card__icon" src="%sassets/img/icons/%s.jpg" '
+                'alt="%s app icon" width="60" height="60" loading="lazy">'
+                % (prefix, e(project["slug"]), e(project["name"]))
+            )
+        rows.append(
+            '<a class="app-card" href="%s.html">%s<span class="app-card__body">'
+            '<span class="app-card__name">%s</span>'
+            '<span class="app-card__tag">Privacy policy</span>'
+            '<span class="app-card__meta"><span>Updated %s</span></span>'
+            "</span></a>"
+            % (e(policy["slug"]), icon, e(policy["app"]), e(policy["updated"]))
+        )
+
+    body = """%s
+<main id="main">
+  <section class="section">
+    <div class="wrap">
+      <a class="back-link" href="%sindex.html#work">%sAll work</a>
+
+      <p class="eyebrow" style="margin-bottom:10px">Privacy</p>
+      <h1>App privacy policies</h1>
+      <p class="lead" style="margin-top:16px">
+        One policy per app I publish, covering what it collects, where that data
+        lives and who it is shared with.
+      </p>
+
+      <div class="app-grid" style="margin-top:40px">%s</div>
+    </div>
+  </section>
+</main>
+%s""" % (header(prefix, ""), prefix, ICONS["arrow-left"], "".join(rows), footer(prefix))
+
+    page = head(
+        "App privacy policies · %s" % SITE["name"],
+        "Privacy policies for the iOS apps published by %s." % SITE["name"],
+        prefix,
+        "privacy/",
+    ) + body
+
+    PRIVACY_DIR.mkdir(exist_ok=True)
+    (PRIVACY_DIR / "index.html").write_text(page, encoding="utf-8")
+
+
 def build_contact_redirect():
     """Keep the old /contact.html URL alive; the form now lives at /#contact."""
     target = BASE_URL + "/#contact"
@@ -772,6 +1067,8 @@ def build_404():
 def build_sitemap():
     urls = [("", "1.0", "monthly")]
     urls += [(f"projects/{p['slug']}.html", "0.8", "monthly") for p in PROJECTS]
+    urls += [("privacy/", "0.4", "yearly")]
+    urls += [(f"privacy/{p['slug']}.html", "0.4", "yearly") for p in POLICIES]
 
     entries = "".join(
         "  <url>\n"
@@ -809,11 +1106,14 @@ def main():
     build_contact_redirect()
     for index, project in enumerate(PROJECTS):
         build_project(index, project)
+    for policy in POLICIES:
+        build_privacy(policy)
+    build_privacy_index()
     build_404()
     build_sitemap()
     build_cname()
     print(f"built: index.html, contact.html (redirect), 404.html, {len(PROJECTS)} project pages, "
-          "sitemap.xml, robots.txt, CNAME")
+          f"{len(POLICIES)} privacy pages + hub, sitemap.xml, robots.txt, CNAME")
 
 
 if __name__ == "__main__":
