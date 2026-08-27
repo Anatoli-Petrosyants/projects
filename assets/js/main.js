@@ -187,15 +187,10 @@
   function validate() {
     var ok = true;
     var name = form.elements.name;
-    var email = form.elements.email;
     var message = form.elements.message;
 
     if (!name.value.trim()) { setError(name, "Please enter your name."); ok = false; }
     else setError(name, "");
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) {
-      setError(email, "Please enter a valid email address."); ok = false;
-    } else setError(email, "");
 
     if (message.value.trim().length < 10) {
       setError(message, "Please write at least 10 characters."); ok = false;
@@ -213,12 +208,11 @@
     }
 
     var name = form.elements.name.value.trim();
-    var email = form.elements.email.value.trim();
     var topic = form.elements.topic ? form.elements.topic.value : "";
     var message = form.elements.message.value.trim();
 
     var subject = topic ? topic + ": " + name : "Portfolio enquiry from " + name;
-    var body = message + "\n\n" + name + "\n" + email;
+    var body = message + "\n\n" + name;
 
     window.location.href =
       "mailto:" + mailTo +

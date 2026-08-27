@@ -646,11 +646,6 @@ def build_index():
             <span class="error" aria-live="polite"></span>
           </div>
           <div class="field">
-            <label for="email">Your email</label>
-            <input id="email" name="email" type="email" autocomplete="email" required>
-            <span class="error" aria-live="polite"></span>
-          </div>
-          <div class="field">
             <label for="message">Message</label>
             <textarea id="message" name="message" rows="7" required></textarea>
             <span class="error" aria-live="polite"></span>
