@@ -13,7 +13,6 @@ no bundler, no framework, no runtime dependencies. Python 3 stdlib only.
 ```sh
 python3 build.py                 # regenerate all HTML from data/*.json
 python3 fetch_screenshots.py     # refresh assets/img/shots/<slug>/ from the App Store
-python3 fetch_contributions.py   # refresh data/contributions.json from GitHub
 python3 -m http.server 8000      # local preview at http://localhost:8000
 ```
 
@@ -40,8 +39,9 @@ Three layers:
    and the per-screen gallery folder `assets/img/shots/<slug>/`.
    Rename a slug and all four must move.
 3. **`data/contributions.json`** — a snapshot of the GitHub contribution
-   calendar, written by `fetch_contributions.py`. Optional: `build.py` drops the
-   home page's activity section when the file is absent rather than failing.
+   calendar. Optional: `build.py` drops the home page's activity section when
+   the file is absent rather than failing. There is no committed script that
+   writes it; see "Refreshing the contribution graph" below.
 4. **`build.py`** — templates as Python functions. `head()`, `header()`,
    `footer()` build shared chrome; `build_index()`, `build_project()`,
    `build_contact_redirect()`, `build_404()` build pages; `build_sitemap()` writes
@@ -147,22 +147,33 @@ there — delete the folder and the page falls back to the single wide collage.
 The collage in `assets/img/apps/<slug>.jpg` is still the `og:image` for the
 project page, since a wide image is what a social card wants.
 
-The GitHub contribution heatmap on the home page is a build-time snapshot, not a
-runtime fetch — a browser request to GitHub would be a third-party dependency the
-rest of the site does not have. There is no public REST endpoint for the calendar
-(the GraphQL one needs a token), so `fetch_contributions.py` parses the same
-unauthenticated HTML fragment the profile page loads:
+### Refreshing the contribution graph
 
-```sh
-curl -s -H "X-Requested-With: XMLHttpRequest" \
-  "https://github.com/users/<login>/contributions"
-```
+The heatmap on the home page is a build-time snapshot, not a runtime fetch — a
+browser request to GitHub would be a third-party dependency the rest of the site
+does not have. The scraper is deliberately *not* committed; it runs perhaps once
+a quarter, so it lives as a throwaway script rather than repo weight. To rebuild
+`data/contributions.json`, write one that does this:
 
-Day cells carry `data-date` and `data-level` (the 0-4 colour bucket); the exact
-per-day count only exists in the `<tool-tip>` that describes each cell, which is
-why the parser reads both. The login comes from `links.github` in `site.json`.
-The snapshot goes stale on its own — re-run the script and `build.py` to refresh
-it, and commit both files.
+1. GET `https://github.com/users/<login>/contributions` with the headers
+   `User-Agent: Mozilla/5.0` and `X-Requested-With: XMLHttpRequest`. That is the
+   same unauthenticated HTML fragment the profile page loads; there is no public
+   REST endpoint for the calendar and the GraphQL one needs a token. `<login>`
+   comes from `links.github` in `site.json`. Add
+   `?from=YYYY-01-01&to=YYYY-12-31` for a single calendar year instead of the
+   rolling twelve months.
+2. Each day is a `<td data-date="YYYY-MM-DD" data-level="0..4"
+   id="contribution-day-component-<row>-<column>">`. `data-level` is only the
+   colour bucket; the exact count lives in the `<tool-tip for="<that id>">` text
+   ("No contributions on …" / "N contributions on …"), so both have to be read.
+3. Month labels are `<td class="ContributionCalendar-label" colspan="N">`, and
+   the total is the `<h2 id="js-contribution-activity-description">` text.
+
+The JSON build.py expects: `user`, `total`, `from`, `to`, `fetched`, `months`
+(a list of `{label, weeks}` in column order) and `weeks` (column-major, one
+list of seven entries per week, each `{date, level, count}` or `null` for the
+padding at either end of a partial week). Rebuild and commit the JSON together
+with the regenerated `index.html`.
 
 Screenshot collages are resized to 1400px wide and then converted to JPEG, which
 cut them from roughly 1 MB each to 250 KB with no visible loss — the source PNGs

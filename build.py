@@ -552,7 +552,7 @@ def build_index():
         <div class="snapshot__graph">
           <div class="snapshot__head">
             <h2>{'{:,}'.format(CONTRIB['total'])} contributions in the last year</h2>
-            <p class="muted">{e(short_date(CONTRIB['from']))} — {e(short_date(CONTRIB['to']))} ·
+            <p class="muted">
               <a href="{e(SITE['links']['github'])}" rel="noopener" target="_blank">@{e(CONTRIB['user'])}</a>
             </p>
           </div>
