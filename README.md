@@ -11,7 +11,9 @@ generated from two JSON files by a small Python script.
 ```
 data/site.json          Bio, stats, skills, experience, education, links
 data/projects.json      One entry per App Store app
+data/contributions.json GitHub contribution graph snapshot (fetch_contributions.py)
 build.py                Generator: JSON + templates -> HTML
+fetch_contributions.py  Refreshes data/contributions.json from GitHub
 assets/css/style.css    Single stylesheet (dark by default, light theme supported)
 assets/js/main.js       Theme toggle, scroll reveal, contact-form mailto builder
 assets/img/icons/       512px App Store icons, used on cards
@@ -50,6 +52,18 @@ styling in `assets/css/style.css`.
    screenshots with `sips -Z 1400 in.png --out tmp.png` then
    `sips -s format jpeg -s formatOptions 82 tmp.png --out <slug>.jpg`.
 3. Run `python3 build.py`.
+
+### Refreshing the GitHub activity graph
+
+The home page heatmap is baked into `index.html` at build time from a snapshot,
+so nothing is fetched in the visitor's browser. Re-take the snapshot with:
+
+```sh
+python3 fetch_contributions.py
+python3 build.py
+```
+
+Commit `data/contributions.json` together with the regenerated `index.html`.
 
 ## Local preview
 

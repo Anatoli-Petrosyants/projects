@@ -28,6 +28,15 @@ PROJECTS = json.loads((DATA / "projects.json").read_text(encoding="utf-8"))
 POLICIES = json.loads((DATA / "policies.json").read_text(encoding="utf-8"))
 POLICY_BY_PROJECT = {p["project"]: p for p in POLICIES if p.get("project")}
 
+# Written by fetch_contributions.py. Optional: without it the home page simply
+# drops the GitHub activity section instead of failing the build.
+CONTRIB_PATH = DATA / "contributions.json"
+CONTRIB = (
+    json.loads(CONTRIB_PATH.read_text(encoding="utf-8"))
+    if CONTRIB_PATH.exists()
+    else None
+)
+
 BASE_URL = SITE["baseUrl"].rstrip("/")
 BUILD_DATE = datetime.date.today().isoformat()
 
@@ -389,6 +398,85 @@ def gallery(prefix, project, shots):
     return '<div class="gallery" data-gallery>%s%s</div>' % (strip, lightbox)
 
 
+MONTHS = ("January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December")
+WEEKDAYS = ("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+            "Saturday")
+# GitHub labels only every other row, so the seven-tall column stays readable.
+WEEKDAY_LABELS = {1: "Mon", 3: "Wed", 5: "Fri"}
+
+
+def long_date(iso):
+    """2026-04-02 -> April 2, 2026."""
+    year, month, day = (int(part) for part in iso.split("-"))
+    return "%s %d, %d" % (MONTHS[month - 1], day, year)
+
+
+def short_date(iso):
+    """2026-04-02 -> Apr 2, 2026."""
+    year, month, day = (int(part) for part in iso.split("-"))
+    return "%s %d, %d" % (MONTHS[month - 1][:3], day, year)
+
+
+def contribution_calendar():
+    """The GitHub contribution heatmap, rendered from data/contributions.json.
+
+    A CSS grid rather than GitHub's table: one column per week, seven rows,
+    filled column-major so the cells land the same way the data is stored.
+    Empty leading and trailing slots keep the last week aligned. The grid is
+    aria-hidden and the wrapper carries a single label -- 371 announced cells
+    is noise, and the heading already states the total.
+    """
+    if not CONTRIB:
+        return ""
+
+    weeks = CONTRIB["weeks"]
+
+    months = ""
+    for month in CONTRIB["months"]:
+        months += '<span style="grid-column:span %d">%s</span>' % (
+            month["weeks"], e(month["label"]),
+        )
+
+    weekdays = ""
+    for row in range(7):
+        label = WEEKDAY_LABELS.get(row, "")
+        weekdays += '<span>%s</span>' % e(label)
+
+    cells = ""
+    for week in weeks:
+        for day in week:
+            if day is None:
+                cells += '<span class="calendar__day calendar__day--void"></span>'
+                continue
+            count = day["count"]
+            cells += (
+                '<span class="calendar__day" data-level="%d" title="%s on %s"></span>'
+                % (
+                    day["level"],
+                    "1 contribution" if count == 1 else "%d contributions" % count,
+                    e(long_date(day["date"])),
+                )
+            )
+
+    label = "GitHub contribution graph: %s contributions from %s to %s" % (
+        "{:,}".format(CONTRIB["total"]),
+        short_date(CONTRIB["from"]),
+        short_date(CONTRIB["to"]),
+    )
+
+    columns = "grid-template-columns:repeat(%d,minmax(0,1fr))" % len(weeks)
+    return """<div class="calendar" role="img" aria-label="%s">
+  <div class="calendar__scroll" tabindex="0">
+    <div class="calendar__grid" aria-hidden="true">
+      <div class="calendar__months" style="%s">%s</div>
+      <div class="calendar__weekdays">%s</div>
+      <div class="calendar__days" style="%s">%s</div>
+    </div>
+  </div>
+</div>""" % (e(label), columns, months, weekdays, columns, cells)
+
+
 # --------------------------------------------------------------------------
 # pages
 # --------------------------------------------------------------------------
@@ -458,6 +546,19 @@ def build_index():
         for ed in SITE["education"]
     )
 
+    activity = ""
+    if CONTRIB:
+        activity = f"""
+        <div class="snapshot__graph">
+          <div class="snapshot__head">
+            <h2>{'{:,}'.format(CONTRIB['total'])} contributions in the last year</h2>
+            <p class="muted">{e(short_date(CONTRIB['from']))} — {e(short_date(CONTRIB['to']))} ·
+              <a href="{e(SITE['links']['github'])}" rel="noopener" target="_blank">@{e(CONTRIB['user'])}</a>
+            </p>
+          </div>
+          {contribution_calendar()}
+        </div>"""
+
     body = f"""{header('', 'index.html')}
 <main id="main">
 
@@ -478,8 +579,10 @@ def build_index():
     </div>
   </section>
 
-  <section class="wrap" style="padding-bottom:clamp(28px,4vw,48px)">
-    <div class="stats reveal">{stats}</div>
+  <section class="wrap" id="activity" style="padding-bottom:clamp(28px,4vw,48px)">
+    <div class="snapshot reveal">
+      <div class="stats">{stats}</div>{activity}
+    </div>
   </section>
 
   <section class="section" id="work">
