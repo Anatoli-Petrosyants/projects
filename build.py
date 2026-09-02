@@ -299,11 +299,25 @@ def person_schema():
 # fragments
 # --------------------------------------------------------------------------
 
+def has_rating(project):
+    """Whether the App Store has scored this app yet.
+
+    A just-released app sits at zero ratings, and everything rating-shaped is
+    dropped for it rather than printed: "★ 0 (0)" reads as a bad score, and an
+    aggregateRating with ratingCount 0 is invalid structured data.
+    """
+    return bool(project["rating"]) and project["ratingCount"] not in ("", "0")
+
+
 def app_card(project, prefix):
     badge = ""
     if project["ownership"] == "own":
         badge = '<span class="badge">My app</span>'
-    meta = [f"{e(project['genre'])}", f"★ {e(project['rating'])} ({e(project['ratingCount'])})"]
+    meta = [f"{e(project['genre'])}"]
+    if has_rating(project):
+        meta.append(f"★ {e(project['rating'])} ({e(project['ratingCount'])})")
+    else:
+        meta.append(f"New · {e(project['released'])}")
     return f"""<a class="app-card" href="{prefix}projects/{e(project['slug'])}.html">
   <img class="app-card__icon" src="{prefix}assets/img/icons/{e(project['slug'])}.jpg"
        alt="{e(project['name'])} app icon" width="60" height="60" loading="lazy">
@@ -687,10 +701,12 @@ def build_project(index, project):
     facts = [
         ("Role", project["role"]),
         ("Category", project["genre"]),
-        ("App Store rating", f"★ {project['rating']} · {project['ratingCount']} ratings"),
         ("On the store since", project["released"]),
         ("Published by", project["seller"]),
     ]
+    if has_rating(project):
+        facts.insert(2, ("App Store rating",
+                         f"★ {project['rating']} · {project['ratingCount']} ratings"))
     if project.get("period"):
         facts.insert(1, ("Worked on", project["period"]))
 
@@ -746,14 +762,15 @@ def build_project(index, project):
         "datePublished": project["released"],
         "publisher": {"@type": "Organization", "name": project["seller"]},
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-        "aggregateRating": {
+    }
+    if has_rating(project):
+        app_schema["aggregateRating"] = {
             "@type": "AggregateRating",
             "ratingValue": project["rating"],
             "ratingCount": project["ratingCount"].replace(",", ""),
             "bestRating": "5",
             "worstRating": "1",
-        },
-    }
+        }
     if project["ownership"] == "own":
         app_schema["author"] = PERSON_REF
     else:
@@ -825,10 +842,14 @@ def build_project(index, project):
 {schema}
 {footer(prefix)}"""
 
+    standing = (f"rated {project['rating']} on the App Store"
+                if has_rating(project)
+                else f"on the App Store since {project['released']}")
+
     page = head(
         f"{project['name']} · iOS app by {SITE['name']}",
         f"{project['tagline']} {project['role']} on {project['name']}, "
-        f"rated {project['rating']} on the App Store.",
+        f"{standing}.",
         prefix,
         f"projects/{slug}.html",
         og_image=f"assets/img/apps/{slug}.jpg",

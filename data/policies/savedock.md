@@ -1,12 +1,12 @@
 # Privacy Policy
 
-This privacy policy applies to the **Savedock** app (hereby referred to as "Application") for Apple devices — iPhone, iPad, and Mac — created by Anatoli Petrosyants (hereby referred to as "Service Provider") as a Freemium service. This service is provided "AS IS".
+This privacy policy applies to the **Deck** app (hereby referred to as "Application") for Apple devices — iPhone, iPad, and Mac — created by Anatoli Petrosyants (hereby referred to as "Service Provider") as a Freemium service. This service is provided "AS IS".
 
 ---
 
 ## Summary
 
-Savedock saves links, notes, photos, and PDFs for you to find again later.
+Deck saves links, notes, photos, and PDFs for you to find again later.
 
 - The Application does **not** require an account.
 - The Application has **no analytics, tracking, or advertising**, and does not use any third-party analytics or crash-reporting service.

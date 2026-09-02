@@ -247,5 +247,39 @@
       "Bonjour",
       "WebSocket"
     ]
+  },
+  {
+    "slug": "deck",
+    "name": "Deck: Save Links & Bookmarks",
+    "tagline": "Save a link in one tap, find it later. No account, no server, no subscription.",
+    "seller": "Anatoli Petrosyants",
+    "ownership": "own",
+    "role": "Solo design and development",
+    "period": "2026 — present",
+    "genre": "Productivity · Utilities",
+    "rating": "",
+    "ratingCount": "0",
+    "released": "2026",
+    "appStoreUrl": "https://apps.apple.com/us/app/deck-save-links-bookmarks/id6789552094",
+    "about": [
+      "Deck is a personal place for the links you keep meaning to come back to. Tap Share in Safari, Messages or any other app, pick a folder, and it is saved — along with images, text and PDFs. There is no sign-up screen, because there is nothing to sign up for.",
+      "Saves live in the user's own iCloud and sync across iPhone, iPad and Mac. The app has no server, collects nothing and tracks nothing, so there is no service that can be shut down and take someone's links with it. Folders carry a color and an icon, and each opens in one of four layouts: List, Cards, Masonry and Headlines."
+    ],
+    "contributions": [
+      "My own app: concept, design, development and App Store release.",
+      "Share extension that saves links, images, text and PDFs from any app.",
+      "iCloud sync through a private CloudKit database, with no account of my own.",
+      "On-device AI summaries with Foundation Models, so nothing leaves the phone.",
+      "Shared folders between people, with no account needed on either side."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "SwiftData",
+      "CloudKit",
+      "Foundation Models",
+      "Share Extension",
+      "Mac Catalyst"
+    ]
   }
 ]

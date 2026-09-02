@@ -15,9 +15,9 @@
   },
   {
     "slug": "savedock",
-    "app": "Savedock",
-    "project": null,
+    "app": "Deck: Save Links & Bookmarks",
+    "project": "deck",
     "source": "savedock.md",
-    "updated": "2026-08-03"
+    "updated": "2026-09-02"
   }
 ]
