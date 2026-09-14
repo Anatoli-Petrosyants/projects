@@ -37,6 +37,16 @@ CONTRIB = (
     else None
 )
 
+# A hand-refreshed snapshot of the Upwork profile's completed jobs. Optional in
+# the same way contributions.json is: without it the home page drops the client
+# reviews section rather than failing the build.
+TESTIMONIALS_PATH = DATA / "testimonials.json"
+TESTIMONIALS = (
+    json.loads(TESTIMONIALS_PATH.read_text(encoding="utf-8"))
+    if TESTIMONIALS_PATH.exists()
+    else None
+)
+
 BASE_URL = SITE["baseUrl"].rstrip("/")
 BUILD_DATE = datetime.date.today().isoformat()
 
@@ -93,6 +103,7 @@ ICONS = {
     "arrow-left": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>',
     "sun": '<svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     "moon": '<svg class="icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+    "star": '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>',
 }
 
 
@@ -103,6 +114,12 @@ ICONS = {
 NAV = [
     ("index.html", "Home", False),
     ("index.html#work", "Work", False),
+]
+# only worth a nav slot when data/testimonials.json actually put the section on
+# the page — otherwise the link would point at an anchor that is not there
+if TESTIMONIALS and TESTIMONIALS.get("reviews"):
+    NAV.append(("index.html#reviews", "Reviews", True))
+NAV += [
     ("index.html#experience", "Experience", True),
     ("index.html#contact", "Contact", False),
 ]
@@ -520,6 +537,113 @@ def contact_links(prefix=""):
     return "".join(out)
 
 
+def stars(rating):
+    """Five stars with a clipped gold overlay, so 4.85 renders as 97% filled."""
+    value = max(0.0, min(5.0, float(rating)))
+    row = ICONS["star"] * 5
+    return (
+        '<span class="stars" role="img" aria-label="Rated %s out of 5 stars">'
+        '<span class="stars__track" aria-hidden="true">%s</span>'
+        '<span class="stars__fill" style="width:%.2f%%" aria-hidden="true">%s</span>'
+        "</span>" % (("%g" % value), row, value / 5 * 100, row)
+    )
+
+
+def testimonials_section():
+    """Client reviews from the Upwork profile. Empty string when there is no
+    data file, which is what keeps the section optional."""
+    if not TESTIMONIALS or not TESTIMONIALS.get("reviews"):
+        return ""
+
+    reviews = TESTIMONIALS["reviews"]
+    visible = TESTIMONIALS.get("visible", 6)
+
+    cards = []
+    for review in reviews:
+        meta = []
+        if review.get("period"):
+            meta.append('<span>%s</span>' % e(review["period"]))
+        if review.get("budget"):
+            meta.append('<span>%s</span>' % e(review["budget"]))
+
+        # a review without a recorded rating simply drops the stars rather than
+        # implying one that was never captured
+        head = ""
+        if review.get("rating") is not None:
+            head = (
+                '<div class="quote__head">%s<span class="quote__score">%s</span></div>'
+                % (stars(review["rating"]), e("%.2f" % float(review["rating"])))
+            )
+
+        cards.append(
+            '<article class="quote">%s'
+            '<h3 class="quote__title">%s</h3>'
+            '<blockquote class="quote__text">%s</blockquote>'
+            "%s</article>"
+            % (
+                head,
+                e(review["title"]),
+                e(review["text"]),
+                '<div class="quote__meta">%s</div>' % "".join(meta) if meta else "",
+            )
+        )
+
+    head_cards = "".join(cards[:visible])
+    rest = ""
+    if len(cards) > visible:
+        rest = (
+            '<details class="quotes__more">'
+            "<summary>Show all %d reviews</summary>"
+            '<div class="quotes">%s</div>'
+            "</details>" % (len(cards), "".join(cards[visible:]))
+        )
+
+    # the profile carries more reviews than the page quotes, so the count comes
+    # from the data file and only falls back to the number actually rendered
+    facts = ["%s client reviews" % e(str(TESTIMONIALS.get("totalReviews") or len(reviews)))]
+    if TESTIMONIALS.get("totalJobs"):
+        facts.append("%s completed jobs" % e(str(TESTIMONIALS["totalJobs"])))
+    if TESTIMONIALS.get("jobSuccess"):
+        facts.append("%s job success" % e(TESTIMONIALS["jobSuccess"]))
+    if TESTIMONIALS.get("totalHours"):
+        facts.append("%s hours worked" % e(TESTIMONIALS["totalHours"]))
+
+    # the headline score is shown only when there are ratings to average
+    rated = [float(r["rating"]) for r in reviews if r.get("rating") is not None]
+    average = TESTIMONIALS.get("averageRating")
+    if average is None and rated:
+        average = sum(rated) / len(rated)
+    score = ""
+    if average is not None:
+        score = (
+            '<div class="reviews-summary__score">%s<strong>%s</strong></div>'
+            % (stars(average), e("%.2f" % float(average)))
+        )
+
+    source = TESTIMONIALS.get("profileUrl") or SITE["links"]["upwork"]
+
+    return """
+  <section class="section" id="reviews">
+    <div class="wrap">
+      <p class="eyebrow">Client reviews</p>
+      <h2>What clients say</h2>
+      <div class="reviews-summary">
+        %s
+        <p class="muted">%s on <a href="%s" rel="noopener" target="_blank">Upwork</a></p>
+      </div>
+      <div class="quotes reveal">%s</div>
+      %s
+    </div>
+  </section>
+""" % (
+        score,
+        " · ".join(facts),
+        e(source),
+        head_cards,
+        rest,
+    )
+
+
 def build_index():
     stats = "".join(
         f'<div class="stat"><div class="stat__value">{e(s["value"])}</div>'
@@ -611,7 +735,7 @@ def build_index():
       </div>
     </div>
   </section>
-
+{testimonials_section()}
   <section class="section" id="skills">
     <div class="wrap">
       <p class="eyebrow">Toolkit</p>
