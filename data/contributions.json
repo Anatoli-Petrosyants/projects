@@ -1,13 +1,13 @@
 {
   "user": "Anatoli-Petrosyants",
-  "total": 2077,
-  "from": "2025-09-07",
-  "to": "2026-09-11",
-  "fetched": "2026-09-11",
+  "total": 2253,
+  "from": "2025-09-21",
+  "to": "2026-09-24",
+  "fetched": "2026-09-24",
   "months": [
     {
       "label": "Sep",
-      "weeks": 4
+      "weeks": 2
     },
     {
       "label": "Oct",
@@ -54,85 +54,11 @@
       "weeks": 5
     },
     {
-      "label": "",
-      "weeks": 1
+      "label": "Sep",
+      "weeks": 3
     }
   ],
   "weeks": [
-    [
-      {
-        "date": "2025-09-07",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-08",
-        "level": 1,
-        "count": 2
-      },
-      {
-        "date": "2025-09-09",
-        "level": 1,
-        "count": 1
-      },
-      {
-        "date": "2025-09-10",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-11",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-12",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-13",
-        "level": 0,
-        "count": 0
-      }
-    ],
-    [
-      {
-        "date": "2025-09-14",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-15",
-        "level": 1,
-        "count": 1
-      },
-      {
-        "date": "2025-09-16",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-17",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-18",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-19",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-20",
-        "level": 0,
-        "count": 0
-      }
-    ],
     [
       {
         "date": "2025-09-21",
@@ -1997,7 +1923,7 @@
       {
         "date": "2026-09-08",
         "level": 1,
-        "count": 15
+        "count": 16
       },
       {
         "date": "2026-09-09",
@@ -2012,8 +1938,78 @@
       {
         "date": "2026-09-11",
         "level": 2,
-        "count": 23
+        "count": 32
       },
+      {
+        "date": "2026-09-12",
+        "level": 0,
+        "count": 0
+      }
+    ],
+    [
+      {
+        "date": "2026-09-13",
+        "level": 0,
+        "count": 0
+      },
+      {
+        "date": "2026-09-14",
+        "level": 2,
+        "count": 24
+      },
+      {
+        "date": "2026-09-15",
+        "level": 1,
+        "count": 15
+      },
+      {
+        "date": "2026-09-16",
+        "level": 0,
+        "count": 0
+      },
+      {
+        "date": "2026-09-17",
+        "level": 1,
+        "count": 7
+      },
+      {
+        "date": "2026-09-18",
+        "level": 2,
+        "count": 21
+      },
+      {
+        "date": "2026-09-19",
+        "level": 0,
+        "count": 0
+      }
+    ],
+    [
+      {
+        "date": "2026-09-20",
+        "level": 1,
+        "count": 2
+      },
+      {
+        "date": "2026-09-21",
+        "level": 4,
+        "count": 63
+      },
+      {
+        "date": "2026-09-22",
+        "level": 2,
+        "count": 20
+      },
+      {
+        "date": "2026-09-23",
+        "level": 1,
+        "count": 1
+      },
+      {
+        "date": "2026-09-24",
+        "level": 1,
+        "count": 17
+      },
+      null,
       null
     ]
   ]
