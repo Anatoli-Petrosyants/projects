@@ -1,14 +1,10 @@
 {
   "user": "Anatoli-Petrosyants",
-  "total": 2253,
-  "from": "2025-09-21",
-  "to": "2026-09-24",
-  "fetched": "2026-09-24",
+  "total": 2311,
+  "from": "2025-09-28",
+  "to": "2026-10-02",
+  "fetched": "2026-10-02",
   "months": [
-    {
-      "label": "Sep",
-      "weeks": 2
-    },
     {
       "label": "Oct",
       "weeks": 4
@@ -55,47 +51,14 @@
     },
     {
       "label": "Sep",
-      "weeks": 3
+      "weeks": 4
+    },
+    {
+      "label": "Oct",
+      "weeks": 1
     }
   ],
   "weeks": [
-    [
-      {
-        "date": "2025-09-21",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-22",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-23",
-        "level": 1,
-        "count": 2
-      },
-      {
-        "date": "2025-09-24",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-25",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-09-26",
-        "level": 1,
-        "count": 1
-      },
-      {
-        "date": "2025-09-27",
-        "level": 0,
-        "count": 0
-      }
-    ],
     [
       {
         "date": "2025-09-28",
@@ -1923,7 +1886,7 @@
       {
         "date": "2026-09-08",
         "level": 1,
-        "count": 16
+        "count": 17
       },
       {
         "date": "2026-09-09",
@@ -2006,10 +1969,51 @@
       },
       {
         "date": "2026-09-24",
-        "level": 1,
-        "count": 17
+        "level": 2,
+        "count": 22
       },
-      null,
+      {
+        "date": "2026-09-25",
+        "level": 1,
+        "count": 11
+      },
+      {
+        "date": "2026-09-26",
+        "level": 0,
+        "count": 0
+      }
+    ],
+    [
+      {
+        "date": "2026-09-27",
+        "level": 0,
+        "count": 0
+      },
+      {
+        "date": "2026-09-28",
+        "level": 1,
+        "count": 6
+      },
+      {
+        "date": "2026-09-29",
+        "level": 1,
+        "count": 11
+      },
+      {
+        "date": "2026-09-30",
+        "level": 1,
+        "count": 2
+      },
+      {
+        "date": "2026-10-01",
+        "level": 1,
+        "count": 16
+      },
+      {
+        "date": "2026-10-02",
+        "level": 1,
+        "count": 9
+      },
       null
     ]
   ]
