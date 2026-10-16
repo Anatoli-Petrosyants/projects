@@ -281,5 +281,33 @@
       "Share Extension",
       "Mac Catalyst"
     ]
+  },
+  {
+    "slug": "sizewise",
+    "name": "Sizewise: Ring Sizer & Finder",
+    "tagline": "Find a ring size in seconds with nothing but an iPhone. No jeweler, no tape, no printable sizer.",
+    "seller": "Anatoli Petrosyants",
+    "ownership": "own",
+    "role": "Solo design and development",
+    "period": "2026 — present",
+    "genre": "Utilities · Lifestyle",
+    "rating": "",
+    "ratingCount": "0",
+    "released": "2026",
+    "appStoreUrl": "https://apps.apple.com/us/app/sizewise-ring-sizer-finder/id6821928240",
+    "about": [
+      "Sizewise reads the inner diameter of a ring that already fits and turns it into an exact size before an order is placed. Lay the ring on the screen, pinch or slide the circle to match its inner edge, and read the result. It suits engagement rings bought in secret, wedding bands, gifts and rings ordered online from another country.",
+      "Every size system people shop in is covered: US / Canada, UK / Australia, EU / ISO, Japan / China, plus the inner diameter in millimetres. There is no account, no ads and no tracking, and the app works fully offline."
+    ],
+    "contributions": [
+      "My own app: concept, design, development and App Store release.",
+      "On-screen ring measurement calibrated to physical millimetres, with pinch and slider fitting.",
+      "Size conversion across US / Canada, UK / Australia, EU / ISO and Japan / China standards.",
+      "Fully offline, with no account, no ads and no tracking."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI"
+    ]
   }
 ]
