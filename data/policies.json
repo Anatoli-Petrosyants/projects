@@ -23,6 +23,7 @@
   {
     "slug": "sizewise",
     "app": "Sizewise",
+    "project": "sizewise",
     "source": "sizewise.md",
     "updated": "2026-10-13"
   }
