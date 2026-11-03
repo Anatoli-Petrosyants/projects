@@ -12,7 +12,7 @@ no bundler, no framework, no runtime dependencies. Python 3 stdlib only.
 
 ```sh
 python3 build.py                 # regenerate all HTML from data/*.json
-python3 fetch_screenshots.py     # refresh assets/img/shots/<slug>/ from the App Store
+python3 fetch_screenshots.py     # refresh screenshots and preview videos from the App Store
 python3 -m http.server 8000      # local preview at http://localhost:8000
 ```
 
@@ -143,6 +143,19 @@ the script is what buys more detail, at roughly 3x the ~5 MB the folders weigh
 today. It wipes the folder first, so removing a screenshot on
 the App Store removes it from the site. `build.py` reads whatever files are
 there — delete the folder and the page falls back to the single wide collage.
+
+The same script also pulls App Preview videos. The lookup API has no field for
+them, so it reads the HLS playlist URL out of the public `apps.apple.com` listing
+page (the first `"videoUrl"` there is the iPhone preview) and has `ffmpeg` remux
+the highest-bandwidth variant plus its audio into `assets/video/<slug>.mp4`, no
+re-encode, with `+faststart`. The poster frame from the same page is saved
+beside it as `assets/video/<slug>.jpg` at the screenshots' 540px width. Apple
+caps these streams at roughly 332×720, so there is no sharper copy to fetch.
+`ffmpeg` is a Homebrew tool, not a site dependency: without it the video step
+prints a warning and leaves existing files alone. A listing with no preview
+deletes both files. `build.py` puts the video first in the gallery strip when
+both files exist, with `preload="none"` so only the poster loads up front; it
+plays in place and is not part of the lightbox.
 
 The collage in `assets/img/apps/<slug>.jpg` is still the `og:image` for the
 project page, since a wide image is what a social card wants.
