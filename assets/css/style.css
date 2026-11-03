@@ -441,7 +441,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
   padding: 2px 2px 18px;
 }
 .gallery__item { flex: 0 0 auto; scroll-snap-align: start; }
-.gallery__item img {
+.gallery__item img, .gallery__video {
   display: block; width: 270px; height: auto;
   border-radius: 20px; border: 1px solid var(--border);
   background: var(--bg-elev); box-shadow: var(--shadow);
@@ -487,8 +487,10 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 @media (hover: none), (pointer: coarse) {
   .gallery__nav { display: none; }
 }
+/* the img hover lift, but not on a video: it would shift under the controls */
+.gallery__video { transition: none; object-fit: cover; }
 @media (max-width: 640px) {
-  .gallery__item img { width: 200px; border-radius: 16px; }
+  .gallery__item img, .gallery__video { width: 200px; border-radius: 16px; }
   .gallery__zoom { border-radius: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {

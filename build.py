@@ -358,17 +358,52 @@ def screenshots(slug):
     return sorted(folder.glob("*.jpg"))
 
 
+def preview_video(slug):
+    """The App Preview video and its poster frame, or None when there is none.
+
+    fetch_screenshots.py writes both; a video without its poster is treated as
+    absent, since the poster is what gives the <video> its size before load.
+    """
+    video = ROOT / "assets" / "video" / ("%s.mp4" % slug)
+    poster = video.with_suffix(".jpg")
+    if video.is_file() and poster.is_file():
+        return video, poster
+    return None
+
+
 def gallery(prefix, project, shots):
     """A horizontally scrollable strip of one <img> per screenshot.
 
     Each thumbnail is a button that opens the lightbox <dialog> that follows the
-    strip, so a screenshot can be inspected at close to its native size.
+    strip, so a screenshot can be inspected at close to its native size. An App
+    Preview video, when the app has one, leads the strip as the App Store does;
+    it plays in place and is not part of the lightbox.
     """
     slug = project["slug"]
     name = project["name"]
     total = len(shots)
 
     items = ""
+    preview = preview_video(slug)
+    if preview:
+        video, poster = preview
+        # The poster's dimensions, not the stream's: the poster is fetched at
+        # the screenshots' width, so the video card lines up with its neighbours.
+        width, height = image_size(poster)
+        # preload="none": nothing beyond the poster is fetched until a visitor
+        # presses play.
+        items += (
+            '<li class="gallery__item gallery__item--video">'
+            '<video class="gallery__video" src="%sassets/video/%s"'
+            ' poster="%sassets/video/%s" width="%d" height="%d"'
+            ' controls muted playsinline preload="none"'
+            ' aria-label="%s App Preview video"></video></li>'
+            % (
+                prefix, e(video.name), prefix, e(poster.name), width, height,
+                e(name),
+            )
+        )
+
     for number, path in enumerate(shots, start=1):
         width, height = image_size(path)
         items += (
