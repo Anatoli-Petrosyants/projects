@@ -96,6 +96,36 @@
     ]
   },
   {
+    "slug": "easy-voice-recorder",
+    "name": "Easy Voice Recorder",
+    "tagline": "A reliable, high-quality audio recorder with transcription and fast playback.",
+    "seller": "Digipom Inc.",
+    "ownership": "client",
+    "role": "iOS Developer",
+    "period": "",
+    "genre": "Productivity",
+    "rating": "4.8",
+    "ratingCount": "10,869",
+    "released": "2017",
+    "appStoreUrl": "https://apps.apple.com/us/app/easy-voice-recorder/id1222784166",
+    "about": [
+      "Easy Voice Recorder captures meetings, lectures, personal notes and songs in high quality, saving to PCM, MP4 or AAC on the device or in iCloud Drive.",
+      "Recordings can be transcribed to text, reviewed at high speed, trimmed, turned into videos with photos, and started instantly from Home Screen and Lock Screen widgets."
+    ],
+    "contributions": [
+      "iOS development on a long-running, widely used audio recording app.",
+      "Recording, playback and editing flows built on AVFoundation.",
+      "Home Screen and Lock Screen widgets for one-tap recording."
+    ],
+    "tech": [
+      "Swift",
+      "SwiftUI",
+      "UIKit",
+      "AVFoundation",
+      "WidgetKit"
+    ]
+  },
+  {
     "slug": "easy-metronome",
     "name": "Easy Metronome",
     "tagline": "A precise, customizable metronome for practice and live performance.",
