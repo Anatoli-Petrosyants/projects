@@ -38,6 +38,48 @@
     }
   }
 
+  /* ---- section-aware nav ---- */
+  /* On the home page the nav links are in-page anchors, so mark the one whose
+     section is under the header; and park the floating contact button while
+     the contact section it points at is already on screen. */
+  if ("IntersectionObserver" in window) {
+    var navLinks = {};
+    document.querySelectorAll('.nav__links a[href^="./#"], .nav__links a[href^="#"]').forEach(function (a) {
+      navLinks[a.getAttribute("href").split("#")[1]] = a;
+    });
+    /* every section counts, not only the linked ones: scrolling into Skills
+       should clear "Work" rather than leave it lit */
+    var sections = Array.prototype.slice.call(document.querySelectorAll("main section[id]"));
+    if (Object.keys(navLinks).length && sections.length) {
+      var inBand = {};
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { inBand[entry.target.id] = entry.isIntersecting; });
+        var current = null;
+        sections.forEach(function (section) { if (inBand[section.id]) current = section.id; });
+        Object.keys(navLinks).forEach(function (id) {
+          navLinks[id].classList.toggle("is-active", id === current);
+        });
+      /* a thin band just under the sticky header decides which section is current */
+      }, { rootMargin: "-90px 0px -70% 0px" });
+      sections.forEach(function (section) { spy.observe(section); });
+    }
+
+    var fab = document.querySelector(".fab");
+    var contact = document.getElementById("contact");
+    if (fab && contact) {
+      new IntersectionObserver(function (entries) {
+        fab.classList.toggle("is-hidden", entries[0].isIntersecting);
+      }, { threshold: 0.15 }).observe(contact);
+    }
+  }
+
+  /* ---- contribution graph ---- */
+  /* On a narrow screen the calendar scrolls; open it on the latest weeks, the
+     way GitHub does, rather than on the oldest ones. */
+  document.querySelectorAll(".calendar__scroll").forEach(function (scroller) {
+    scroller.scrollLeft = scroller.scrollWidth;
+  });
+
   /* ---- screenshot lightbox ---- */
   /* A thumbnail is only 270px wide, so tapping one opens the same file in a
      modal <dialog> sized to the viewport, with the arrow keys and the on-screen
@@ -198,6 +240,12 @@
 
     return ok;
   }
+
+  /* once a field has been flagged, clear the message as soon as it is fixed
+     rather than waiting for the next submit */
+  form.addEventListener("input", function (event) {
+    if (event.target.getAttribute("aria-invalid") === "true") validate();
+  });
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();

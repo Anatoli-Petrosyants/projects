@@ -8,8 +8,11 @@
   --border-strong: rgba(255, 255, 255, 0.18);
   --text: #f5f5f7;
   --text-dim: #a1a1a8;
-  --text-faint: #6e6e76;
+  --text-faint: #8a8a93;
   --accent: #0a84ff;
+  /* a fill white text sits on: #0a84ff only reaches 3.6:1 against #fff */
+  --accent-fill: #0071e3;
+  --danger: #ff8080;
   --accent-soft: rgba(10, 132, 255, 0.14);
   --star: #f5b301;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.5);
@@ -35,8 +38,10 @@ html[data-theme="light"] {
   --border-strong: rgba(0, 0, 0, 0.18);
   --text: #12121a;
   --text-dim: #55555e;
-  --text-faint: #86868b;
+  --text-faint: #6b6b72;
   --accent: #0060df;
+  --accent-fill: #0060df;
+  --danger: #c62828;
   --accent-soft: rgba(0, 96, 223, 0.10);
   --star: #e0a106;
   --shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 40px rgba(0,0,0,.08);
@@ -57,8 +62,10 @@ html[data-theme="light"] {
     --border-strong: rgba(0, 0, 0, 0.18);
     --text: #12121a;
     --text-dim: #55555e;
-    --text-faint: #86868b;
+    --text-faint: #6b6b72;
     --accent: #0060df;
+    --accent-fill: #0060df;
+    --danger: #c62828;
     --accent-soft: rgba(0, 96, 223, 0.10);
     --star: #e0a106;
     --shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 40px rgba(0,0,0,.08);
@@ -101,6 +108,10 @@ h1, h2, h3, h4 { line-height: 1.12; letter-spacing: -0.022em; font-weight: 600; 
 h1 { font-size: clamp(2.4rem, 6vw, 4rem); letter-spacing: -0.035em; }
 h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
 h3 { font-size: 1.2rem; }
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+/* a lead straight under a section heading otherwise touches it */
+h2 + .lead { margin-top: 12px; }
 
 .wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
 .section { padding-block: clamp(36px, 5vw, 64px); }
@@ -136,15 +147,19 @@ h3 { font-size: 1.2rem; }
 .nav__links { display: flex; gap: 4px; align-items: center; }
 .nav__links a {
   color: var(--text-dim); font-size: .93rem; padding: 7px 12px;
+  min-height: 40px; display: inline-flex; align-items: center;
   border-radius: 8px; white-space: nowrap;
+  transition: color .15s ease, background-color .15s ease;
 }
 .nav__links a:hover { color: var(--text); background: var(--bg-elev-2); text-decoration: none; }
-.nav__links a[aria-current="page"] { color: var(--text); }
+.nav__links a[aria-current="page"], .nav__links a.is-active { color: var(--text); }
+.nav__links a.is-active { background: var(--bg-elev-2); }
 
 .theme-toggle {
-  display: grid; place-items: center; width: 34px; height: 34px; flex: none;
+  display: grid; place-items: center; width: 40px; height: 40px; flex: none;
   background: transparent; border: 1px solid var(--border); border-radius: 9px;
   color: var(--text-dim); cursor: pointer; padding: 0; margin-left: 4px;
+  transition: color .15s ease, border-color .15s ease;
 }
 .theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
 .theme-toggle .icon-sun { display: none; }
@@ -171,10 +186,11 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
   border: 1px solid transparent; cursor: pointer; font-family: inherit;
   transition: transform .15s ease, background .15s ease, border-color .15s ease;
 }
-.btn:hover { text-decoration: none; transform: translateY(-1px); }
+.btn:hover { text-decoration: none; }
+@media (hover: hover) { .btn:hover { transform: translateY(-1px); } }
 .btn:active { transform: translateY(0); }
-.btn--primary { background: var(--accent); color: #fff; }
-.btn--primary:hover { background: color-mix(in srgb, var(--accent) 86%, #fff); }
+.btn--primary { background: var(--accent-fill); color: #fff; }
+.btn--primary:hover { background: color-mix(in srgb, var(--accent-fill) 88%, #000); }
 .btn--ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
 .btn--ghost:hover { background: var(--bg-elev-2); }
 .btn svg { width: 17px; height: 17px; flex: none; }
@@ -227,9 +243,11 @@ html[data-theme="light"] .theme-toggle .icon-moon { display: none; }
   transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
 .app-card:hover {
-  text-decoration: none; transform: translateY(-3px);
+  text-decoration: none;
   border-color: var(--border-strong); background: var(--bg-elev-2);
 }
+@media (hover: hover) { .app-card:hover { transform: translateY(-3px); } }
+.app-card:active { transform: scale(.985); }
 .app-card__icon {
   width: 60px; height: 60px; flex: none; border-radius: 14px;
   border: 1px solid var(--border); object-fit: cover;
@@ -585,11 +603,12 @@ html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
   color: var(--text); background: var(--bg-elev); border: 1px solid var(--border);
   border-radius: var(--radius-sm); resize: vertical;
 }
+.field [aria-invalid="true"] { border-color: var(--danger); }
 .field input:focus, .field textarea:focus, .field select:focus {
   outline: none; border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
-.field .error { font-size: .82rem; color: #ff6b6b; min-height: 0; }
+.field .error { font-size: .82rem; color: var(--danger); min-height: 0; }
 .field .error:empty { display: none; }
 .form-note { font-size: .85rem; color: var(--text-faint); margin-top: 14px; }
 
@@ -614,7 +633,8 @@ html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
   background: var(--text); color: var(--bg);
   font-size: .93rem; font-weight: 600; line-height: 1;
   box-shadow: 0 6px 24px rgba(0, 0, 0, .35), 0 2px 6px rgba(0, 0, 0, .25);
-  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease,
+              opacity .2s ease, visibility 0s;
 }
 .fab:hover {
   text-decoration: none; transform: translateY(-2px);
@@ -622,6 +642,10 @@ html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
   box-shadow: 0 10px 30px rgba(0, 0, 0, .42), 0 2px 8px rgba(0, 0, 0, .28);
 }
 .fab:active { transform: translateY(0); }
+/* main.js sets this while #contact is on screen: the button would only cover
+   the form it points at */
+.fab.is-hidden { opacity: 0; transform: translateY(12px); pointer-events: none; visibility: hidden;
+  transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s; }
 .fab svg { width: 18px; height: 18px; flex: none; }
 
 @media (max-width: 480px) {
@@ -640,9 +664,10 @@ html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
 .footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
 
 /* ---------- reveal ---------- */
-.reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.is-visible { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+/* hidden only once main.js can reveal it again; without JS nothing stays invisible */
+.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.js .reveal.is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .js .reveal { opacity: 1; transform: none; } }
 
 /* ---------- privacy policy ---------- */
 .policy {

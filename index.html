@@ -32,6 +32,7 @@
 <link rel="preload" as="image" href="assets/img/profile.jpg" fetchpriority="high">
 <script>
   (function () {
+    document.documentElement.classList.add("js");
     try {
       var t = localStorage.getItem("theme");
       if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
