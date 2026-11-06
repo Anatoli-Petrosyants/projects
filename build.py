@@ -48,6 +48,10 @@ TESTIMONIALS = (
 )
 
 BASE_URL = SITE["baseUrl"].rstrip("/")
+
+# Cookieless page-view and event counting. Optional: drop the key from
+# site.json and every page builds without the script.
+GOATCOUNTER = SITE.get("goatcounter")
 BUILD_DATE = datetime.date.today().isoformat()
 
 
@@ -151,6 +155,12 @@ def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg
     preload_tag = ""
     if preload:
         preload_tag = f'\n<link rel="preload" as="image" href="{prefix}{preload}" fetchpriority="high">'
+    analytics_tag = ""
+    if GOATCOUNTER:
+        analytics_tag = (
+            '\n<script data-goatcounter="%s" async src="https://gc.zgo.at/count.js"></script>'
+            % e(GOATCOUNTER)
+        )
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -182,7 +192,7 @@ def head(title, description, prefix, canonical, og_image="assets/img/profile.jpg
 <meta name="twitter:image:alt" content="{e(alt)}">
 <link rel="icon" href="{prefix}assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{prefix}assets/img/profile-sm.jpg">
-<link rel="stylesheet" href="{prefix}assets/css/style.css">{preload_tag}
+<link rel="stylesheet" href="{prefix}assets/css/style.css">{preload_tag}{analytics_tag}
 <script>
   (function () {{
     document.documentElement.classList.add("js");
