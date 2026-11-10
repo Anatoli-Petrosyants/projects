@@ -214,6 +214,31 @@
     sync();
   });
 
+  /* ---- analytics events ---- */
+  // GoatCounter counts page views on its own; these are the clicks that leave
+  // the page and would otherwise go unrecorded. A no-op when count.js is
+  // blocked or not configured.
+  function track(path, title) {
+    if (window.goatcounter && typeof window.goatcounter.count === "function") {
+      window.goatcounter.count({ path: path, title: title || path, event: true });
+    }
+  }
+
+  document.addEventListener("click", function (event) {
+    var a = event.target.closest && event.target.closest("a[href]");
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (a.hasAttribute("download")) {
+      track("download-" + href.split("/").pop(), "Download " + href.split("/").pop());
+    } else if (href.indexOf("mailto:") === 0) {
+      track("click-email", "Email link");
+    } else if (href.indexOf("tel:") === 0) {
+      track("click-phone", "Phone link");
+    } else if (a.host && a.host !== location.host) {
+      track("outbound-" + a.host + a.pathname, a.textContent.trim() || a.host);
+    }
+  });
+
   /* ---- contact form -> mailto ---- */
   var form = document.querySelector("[data-mailto-form]");
   if (!form) return;
@@ -261,6 +286,9 @@
 
     var subject = topic ? topic + ": " + name : "Portfolio enquiry from " + name;
     var body = message + "\n\n" + name;
+
+    track("contact-form" + (topic ? "-" + topic.toLowerCase().replace(/\W+/g, "-") : ""),
+      "Contact form" + (topic ? ": " + topic : ""));
 
     window.location.href =
       "mailto:" + mailTo +

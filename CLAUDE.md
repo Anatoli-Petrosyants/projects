@@ -103,9 +103,9 @@ reads `localStorage.theme` before first paint to avoid a flash.
 
 ### JavaScript
 
-`assets/js/main.js` is one IIFE, no modules, loaded with `defer`. It does four
+`assets/js/main.js` is one IIFE, no modules, loaded with `defer`. It does five
 things: theme toggle, `IntersectionObserver` scroll reveal for `.reveal`
-elements, the screenshot lightbox, and the contact form.
+elements, the screenshot lightbox, the contact form, and analytics click events.
 
 The lightbox turns each gallery thumbnail into a button that opens the project
 page's `<dialog class="lightbox">` on the same image file, with on-screen arrows
@@ -119,6 +119,19 @@ The form is wired by the `data-mailto-form`
 attribute whose value is the destination address; it validates client-side and
 then sets `window.location.href` to a `mailto:` URL. Nothing is posted to a
 server — that is deliberate, since GitHub Pages is static-only.
+
+### Analytics
+
+GoatCounter, cookieless, so no consent banner. `goatcounter` in `site.json` is
+the count endpoint; `head()` adds `count.js` to every page when the key is
+present, and removing the key drops the script site-wide. The `contact.html`
+redirect stub skips it on purpose, since it does not go through `head()`.
+GoatCounter counts page views and countries on its own. `main.js` adds events
+through `goatcounter.count({event: true})`: downloads (`download-<file>`),
+`click-email`, `click-phone`, outbound links (`outbound-<host><path>`, which
+covers App Store, GitHub and LinkedIn) and contact form sends
+(`contact-form-<topic>`). If `count.js` is blocked, `track()` does nothing.
+The dashboard is https://anatoli.goatcounter.com.
 
 ## Content sourcing
 
