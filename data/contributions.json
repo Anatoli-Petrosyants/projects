@@ -1,32 +1,32 @@
 {
   "user": "Anatoli-Petrosyants",
-  "total": 2663,
-  "from": "2025-11-09",
-  "to": "2026-11-10",
-  "fetched": "2026-11-10",
+  "total": 2701,
+  "from": "2025-11-16",
+  "to": "2026-11-16",
+  "fetched": "2026-11-16",
   "months": [
     {
-      "label": "Nov",
+      "label": "November",
+      "weeks": 3
+    },
+    {
+      "label": "December",
       "weeks": 4
     },
     {
-      "label": "Dec",
+      "label": "January",
       "weeks": 4
     },
     {
-      "label": "Jan",
+      "label": "February",
       "weeks": 4
     },
     {
-      "label": "Feb",
-      "weeks": 4
-    },
-    {
-      "label": "Mar",
+      "label": "March",
       "weeks": 5
     },
     {
-      "label": "Apr",
+      "label": "April",
       "weeks": 4
     },
     {
@@ -34,68 +34,31 @@
       "weeks": 5
     },
     {
-      "label": "Jun",
+      "label": "June",
       "weeks": 4
     },
     {
-      "label": "Jul",
+      "label": "July",
       "weeks": 4
     },
     {
-      "label": "Aug",
+      "label": "August",
       "weeks": 5
     },
     {
-      "label": "Sep",
+      "label": "September",
       "weeks": 4
     },
     {
-      "label": "Oct",
+      "label": "October",
       "weeks": 4
     },
     {
-      "label": "Nov",
-      "weeks": 2
+      "label": "November",
+      "weeks": 3
     }
   ],
   "weeks": [
-    [
-      {
-        "date": "2025-11-09",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-11-10",
-        "level": 1,
-        "count": 2
-      },
-      {
-        "date": "2025-11-11",
-        "level": 1,
-        "count": 2
-      },
-      {
-        "date": "2025-11-12",
-        "level": 0,
-        "count": 0
-      },
-      {
-        "date": "2025-11-13",
-        "level": 1,
-        "count": 2
-      },
-      {
-        "date": "2025-11-14",
-        "level": 1,
-        "count": 3
-      },
-      {
-        "date": "2025-11-15",
-        "level": 0,
-        "count": 0
-      }
-    ],
     [
       {
         "date": "2025-11-16",
@@ -1970,7 +1933,7 @@
       {
         "date": "2026-11-05",
         "level": 1,
-        "count": 14
+        "count": 16
       },
       {
         "date": "2026-11-06",
@@ -1992,13 +1955,46 @@
       {
         "date": "2026-11-09",
         "level": 1,
-        "count": 3
+        "count": 5
       },
       {
         "date": "2026-11-10",
-        "level": 1,
-        "count": 10
+        "level": 2,
+        "count": 25
       },
+      {
+        "date": "2026-11-11",
+        "level": 1,
+        "count": 8
+      },
+      {
+        "date": "2026-11-12",
+        "level": 1,
+        "count": 8
+      },
+      {
+        "date": "2026-11-13",
+        "level": 0,
+        "count": 0
+      },
+      {
+        "date": "2026-11-14",
+        "level": 0,
+        "count": 0
+      }
+    ],
+    [
+      {
+        "date": "2026-11-15",
+        "level": 0,
+        "count": 0
+      },
+      {
+        "date": "2026-11-16",
+        "level": 1,
+        "count": 12
+      },
+      null,
       null,
       null,
       null,
