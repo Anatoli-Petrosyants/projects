@@ -47,6 +47,16 @@ TESTIMONIALS = (
     else None
 )
 
+# Recommendations copied by hand from the LinkedIn profile. LinkedIn serves
+# signed-out clients an auth wall, so there is nothing to scrape. Optional like
+# the files above: without it the home page drops the section.
+LINKEDIN_PATH = DATA / "linkedin.json"
+LINKEDIN = (
+    json.loads(LINKEDIN_PATH.read_text(encoding="utf-8"))
+    if LINKEDIN_PATH.exists()
+    else None
+)
+
 BASE_URL = SITE["baseUrl"].rstrip("/")
 
 # Cookieless page-view and event counting. Optional: drop the key from
@@ -690,6 +700,93 @@ def testimonials_section():
     )
 
 
+def initials(name):
+    """Two-letter monogram for the recommendation avatar."""
+    parts = [w for w in name.split() if w[:1].isalpha()]
+    if not parts:
+        return "?"
+    if len(parts) == 1:
+        return parts[0][0].upper()
+    return (parts[0][0] + parts[-1][0]).upper()
+
+
+def linkedin_section():
+    """Recommendations from the LinkedIn profile. Empty string when there is no
+    data file, which keeps the section optional."""
+    if not LINKEDIN or not LINKEDIN.get("recommendations"):
+        return ""
+
+    items = LINKEDIN["recommendations"]
+    visible = LINKEDIN.get("visible", 4)
+
+    cards = []
+    for rec in items:
+        meta = []
+        if rec.get("relationship"):
+            meta.append("<span>%s</span>" % e(rec["relationship"]))
+        if rec.get("date"):
+            meta.append("<span>%s</span>" % e(rec["date"]))
+
+        who = e(rec["name"])
+        if rec.get("profileUrl"):
+            who = '<a href="%s" rel="noopener" target="_blank">%s</a>' % (
+                e(rec["profileUrl"]), who)
+        headline = ""
+        if rec.get("headline"):
+            headline = '<span class="rec__headline">%s</span>' % e(rec["headline"])
+
+        cards.append(
+            '<article class="quote rec">'
+            '<div class="rec__person">'
+            '<span class="rec__avatar" aria-hidden="true">%s</span>'
+            '<span class="rec__who"><strong class="rec__name">%s</strong>%s</span>'
+            "</div>"
+            '<blockquote class="quote__text">%s</blockquote>'
+            "%s</article>"
+            % (
+                e(initials(rec["name"])),
+                who,
+                headline,
+                e(rec["text"]),
+                '<div class="quote__meta">%s</div>' % "".join(meta) if meta else "",
+            )
+        )
+
+    head_cards = "".join(cards[:visible])
+    rest = ""
+    if len(cards) > visible:
+        rest = (
+            '<details class="quotes__more">'
+            "<summary>Show all %d recommendations</summary>"
+            '<div class="quotes quotes--recs">%s</div>'
+            "</details>" % (len(cards), "".join(cards[visible:]))
+        )
+
+    source = LINKEDIN.get("profileUrl") or SITE["links"]["linkedin"]
+    total = LINKEDIN.get("totalRecommendations") or len(items)
+
+    return """
+  <section class="section" id="recommendations">
+    <div class="wrap">
+      <p class="eyebrow">Recommendations</p>
+      <h2>What colleagues say</h2>
+      <div class="reviews-summary">
+        <span class="rec__badge">%s</span>
+        <p class="muted">%s recommendations on <a href="%s" rel="noopener" target="_blank">LinkedIn</a></p>
+      </div>
+      <div class="quotes quotes--recs reveal">%s</div>
+      %s
+    </div>
+  </section>
+""" % (
+        ICONS["linkedin"],
+        e(str(total)),
+        e(source),
+        head_cards,
+        rest,
+    )
+
+
 def build_index():
     stats = "".join(
         f'<div class="stat"><div class="stat__value">{e(s["value"])}</div>'
@@ -781,7 +878,7 @@ def build_index():
       </div>
     </div>
   </section>
-{testimonials_section()}
+{testimonials_section()}{linkedin_section()}
   <section class="section" id="skills">
     <div class="wrap">
       <p class="eyebrow">Toolkit</p>

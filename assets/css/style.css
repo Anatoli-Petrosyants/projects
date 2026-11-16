@@ -745,3 +745,25 @@ html.is-lightbox-open, html.is-lightbox-open body { overflow: hidden; }
 .quotes__more[open] > summary::after { transform: rotate(-90deg); }
 .quotes__more > summary:hover { border-color: var(--accent); color: var(--accent); }
 .quotes__more > .quotes { margin-top: 16px; }
+
+/* ---------- linkedin recommendations ---------- */
+.quotes--recs { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.rec__badge {
+  display: inline-grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--accent-soft); color: var(--accent);
+}
+.rec__badge svg { width: 18px; height: 18px; }
+.rec__person { display: flex; align-items: center; gap: 12px; }
+.rec__avatar {
+  flex: 0 0 auto; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  font-size: .9rem; font-weight: 600; letter-spacing: .02em;
+}
+.rec__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rec__name { font-size: .98rem; letter-spacing: -0.01em; }
+.rec__name a { color: inherit; text-decoration: none; }
+.rec__name a:hover { color: var(--accent); }
+.rec__headline { font-size: .82rem; color: var(--text-faint); line-height: 1.4; }
+@media (max-width: 420px) { .quotes--recs { grid-template-columns: 1fr; } }
