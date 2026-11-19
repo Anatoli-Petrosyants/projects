@@ -1,9 +1,9 @@
 {
   "user": "Anatoli-Petrosyants",
-  "total": 2701,
+  "total": 2722,
   "from": "2025-11-16",
-  "to": "2026-11-16",
-  "fetched": "2026-11-16",
+  "to": "2026-11-19",
+  "fetched": "2026-11-19",
   "months": [
     {
       "label": "November",
@@ -1992,11 +1992,23 @@
       {
         "date": "2026-11-16",
         "level": 1,
-        "count": 12
+        "count": 15
       },
-      null,
-      null,
-      null,
+      {
+        "date": "2026-11-17",
+        "level": 1,
+        "count": 7
+      },
+      {
+        "date": "2026-11-18",
+        "level": 1,
+        "count": 11
+      },
+      {
+        "date": "2026-11-19",
+        "level": 0,
+        "count": 0
+      },
       null,
       null
     ]
